@@ -14,9 +14,15 @@ export class LitElementStateful<State> extends LitElement {
     private autoUnsubscribeSubs: LitElementStateSubscription<any>[] = [];
     private stateService: LitElementStateService<State>;
 
-    constructor(stateService: LitElementStateService<State>) {
+    constructor(stateService?: LitElementStateService<State>) {
         super();
-        this.stateService = stateService;
+        if (stateService) {
+            this.stateService = stateService;
+        } else if (LitElementStateService.getGlobalInstance()) {
+            this.stateService = LitElementStateService.getGlobalInstance();
+        } else {
+            throw new Error('Need a LitElementState service via constructor or a global state available.')
+        }
     }
 
     get state(): State {
