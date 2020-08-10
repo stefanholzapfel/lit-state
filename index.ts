@@ -24,5 +24,6 @@ export type ReducableState<State> = {
     } | ReducableState<State[P]>
 };
 
-export { LitElementStateful } from './litElementStateful';
-export { LitElementStateService } from './litElementState.service';
+export * from './litElementStateful';
+export * from './litElementState.service';
+export * from './litElementStateSubscription'
