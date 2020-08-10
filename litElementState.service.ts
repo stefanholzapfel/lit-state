@@ -11,7 +11,8 @@ import { LitElementStateSubscription } from './litElementStateSubscription';
 export class LitElementStateService<State> {
     constructor(
         initialState: State,
-        subscribeOptions?: SubscribeStateOptions
+        subscribeOptions?: SubscribeStateOptions,
+        global = false
     ) {
         if (subscribeOptions) {
             this.subscribeOptions = {
@@ -20,6 +21,14 @@ export class LitElementStateService<State> {
             };
         }
         this._state = initialState;
+        if (global) {
+            LitElementStateService._globalInstance = this;
+        }
+    }
+
+    private static _globalInstance;
+    static getGlobalInstance() {
+        return LitElementStateService._globalInstance;
     }
 
     private _state: State;
