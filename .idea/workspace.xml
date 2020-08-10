@@ -20,14 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6904ee18-ccd0-414e-854f-362652d93b12" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/litElementState.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/litElementState.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/litElementStateSubscription.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/litElementStateful.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +49,7 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../lit-element-starter-kit" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
@@ -77,7 +70,7 @@
       <option name="presentableId" value="Default" />
       <updated>1596619409808</updated>
       <workItem from="1596619411055" duration="10134000" />
-      <workItem from="1597053244701" duration="963000" />
+      <workItem from="1597053244701" duration="1284000" />
     </task>
     <servers />
   </component>
