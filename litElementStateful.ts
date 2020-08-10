@@ -1,30 +1,32 @@
-import { LitElement } from 'lit-element';
-import { DeepPartial } from 'ts-essentials';
+import {LitElement} from 'lit-element';
+import {DeepPartial} from 'ts-essentials';
 import {
     CustomStateReducer,
-    LitElementStateSubscriptionFunction, ReducableState,
-    State, SubscribeStateOptions
+    LitElementStateSubscriptionFunction,
+    ReducableState,
+    SubscribeStateOptions
 } from './litElementState';
-import { LitElementStateService } from './litElementState.service';
-import { LitElementStateSubscription } from './litElementStateSubscription';
+import {LitElementStateService} from './litElementState.service';
+import {LitElementStateSubscription} from './litElementStateSubscription';
 
-export class LitElementStateful extends LitElement {
-    
+export class LitElementStateful<State> extends LitElement {
+
     private autoUnsubscribeSubs: LitElementStateSubscription<any>[] = [];
-    private stateService = LitElementStateService;
-    
-    constructor() {
+    private stateService: LitElementStateService<State>;
+
+    constructor(stateService: LitElementStateService<State>) {
         super();
+        this.stateService = stateService;
     }
-    
+
     get state(): State {
-        return LitElementStateService.state;
+        return this.state;
     };
-    
-    setState(statePartial: DeepPartial<ReducableState>, customReducer?: CustomStateReducer) {
+
+    setState(statePartial: DeepPartial<ReducableState<State>>, customReducer?: CustomStateReducer<State>) {
         this.stateService.set(statePartial, customReducer);
     }
-    
+
     // Overloads
     subscribeState<K1 extends keyof State>(
         k1: K1,
@@ -72,10 +74,10 @@ export class LitElementStateful extends LitElement {
             return subscription;
         }
     }
-    
+
     // TODO: AUTOCONNECT FEATURE THAT AUTOMATICALLY CONNECTS ALL PROPERTIES IN GIVEN STATE PATH WITH PROPERTIES ON
     //  ELEMENT (IF PRESENT)?
-    
+
     // Overloads
     connectState<K1 extends keyof State>(
         k1: K1,
@@ -126,7 +128,7 @@ export class LitElementStateful extends LitElement {
             return subscription;
         }
     }
-    
+
     disconnectedCallback(): void {
         super.disconnectedCallback();
         this.autoUnsubscribeSubs.forEach(subscription => subscription.unsubscribe())

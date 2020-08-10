@@ -1,5 +1,4 @@
-import { DeepPartial, DeepReadonly } from 'ts-essentials';
-import { Language } from '../translate.service';
+import {DeepPartial, DeepReadonly} from 'ts-essentials';
 
 export type LitElementStateSubscriptionFunction<P> = (
     value: StateChange<P>
@@ -10,7 +9,7 @@ export interface StateChange<P> {
     readonly current: DeepReadonly<P> | null
 }
 
-export type CustomStateReducer = (state: State, partialClone: DeepPartial<ReducableState>) => State;
+export type CustomStateReducer<State> = (state: State, partialClone: DeepPartial<ReducableState<State>>) => State;
 export type StateReducerMode = 'merge' | 'replace'
 
 export interface SubscribeStateOptions {
@@ -18,34 +17,10 @@ export interface SubscribeStateOptions {
     autoUnsubscribe?: boolean;
 }
 
-export type ReducableState = State & {
-    app: {
-        _reducerMode?: StateReducerMode
-        user: {
-            _reducerMode?: StateReducerMode
-        },
-        loginError: {
-            _reducerMode?: StateReducerMode
-        }
-    }
-}
-
-export interface State {
-    app: {
-        mobile: boolean;
-        language: Language;
-        previousRoute: string;
-        currentRoute: string;
-    }
-    components: {
-        main: {
-        
-        }
-        page1: {
-        
-        },
-        page2: {
-        
-        }
-    }
-}
+// TODO: NOT WORKING....HOW TO SOLVE?
+export type ReducableState<State> = {
+    [P in keyof State]?: State[P] &
+    {
+        _reducerMode?: StateReducerMode;
+    } | ReducableState<State[P]>
+};

@@ -4,46 +4,44 @@ import {
     CustomStateReducer,
     LitElementStateSubscriptionFunction,
     ReducableState,
-    //State,
     SubscribeStateOptions
 } from './litElementState';
 import { LitElementStateSubscription } from './litElementStateSubscription';
 
 export class LitElementStateService<State> {
-    static async init(
+    constructor(
         initialState: State,
         subscribeOptions?: SubscribeStateOptions
-    ): Promise<LitElementStateService> {
+    ) {
         if (subscribeOptions) {
-            LitElementStateService.subscribeOptions = {
-                ...LitElementStateService.subscribeOptions,
+            this.subscribeOptions = {
+                ...this.subscribeOptions,
                 ...subscribeOptions
             };
         }
         this._state = initialState;
-        return LitElementStateService;
     }
-    
-    private static _state: State;
-    static get state(): State {
+
+    private _state: State;
+    get state(): State {
         return this._state;
     };
     
-    private static subscribeOptions: SubscribeStateOptions = {
+    private subscribeOptions: SubscribeStateOptions = {
         getInitialValue: true,
         autoUnsubscribe: true
     };
     
-    private static stateSubscriptions: LitElementStateSubscription<any>[] = [];
+    private stateSubscriptions: LitElementStateSubscription<any>[] = [];
     
-    static set(statePartial: DeepPartial<ReducableState>, customReducer?: CustomStateReducer): void {
+    set(statePartial: DeepPartial<ReducableState<State>>, customReducer?: CustomStateReducer<State>): void {
         if (customReducer) {
             this._state = customReducer(
                 this._state,
                 statePartial
             );
         } else {
-            this.deepMerge(
+            this.deepReduce(
                 this._state,
                 statePartial
             );
@@ -54,19 +52,19 @@ export class LitElementStateService<State> {
     };
     
     // Overloads
-    static subscribe<K1 extends keyof State>(
+    subscribe<K1 extends keyof State>(
         k1: K1,
         subscriptionFunction: LitElementStateSubscriptionFunction<State[K1]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1]>;
-    static subscribe<K1 extends keyof State,
+    subscribe<K1 extends keyof State,
         K2 extends keyof State[K1]>(
         k1: K1,
         k2: K2,
         subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2]>;
-    static subscribe<K1 extends keyof State,
+    subscribe<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2]>(
         k1: K1,
@@ -75,7 +73,7 @@ export class LitElementStateService<State> {
         subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2][K3]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3]>;
-    static subscribe<K1 extends keyof State,
+    subscribe<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2],
         K4 extends keyof State[K1][K2][K3]>(
@@ -87,7 +85,7 @@ export class LitElementStateService<State> {
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
     // Implementation
-    static subscribe<Part>(
+    subscribe<Part>(
         ...params: (string | LitElementStateSubscriptionFunction<Part> | SubscribeStateOptions)[]
     ): LitElementStateSubscription<Part> {
         let options = this.subscribeOptions;
@@ -103,13 +101,13 @@ export class LitElementStateService<State> {
     }
     
     // Overloads
-    static connect<K1 extends keyof State>(
+    connect<K1 extends keyof State>(
         k1: K1,
         propertyName: string,
         litElement: LitElement,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1]>;
-    static connect<K1 extends keyof State,
+    connect<K1 extends keyof State,
         K2 extends keyof State[K1]>(
         k1: K1,
         k2: K2,
@@ -117,7 +115,7 @@ export class LitElementStateService<State> {
         litElement: LitElement,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2]>;
-    static connect<K1 extends keyof State,
+    connect<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2]>(
         k1: K1,
@@ -127,7 +125,7 @@ export class LitElementStateService<State> {
         litElement: LitElement,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3]>;
-    static connect<K1 extends keyof State,
+    connect<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2],
         K4 extends keyof State[K1][K2][K3]>(
@@ -140,7 +138,7 @@ export class LitElementStateService<State> {
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
     // Implementation
-    static connect<Part>(
+    connect<Part>(
         ...params: (string | LitElement | SubscribeStateOptions)[]
     ): LitElementStateSubscription<Part> {
         let options = this.subscribeOptions;
@@ -164,13 +162,13 @@ export class LitElementStateService<State> {
         );
     }
     
-    static getSubscribeOptions(): Readonly<SubscribeStateOptions> {
-        return LitElementStateService.subscribeOptions;
+    getSubscribeOptions(): Readonly<SubscribeStateOptions> {
+        return this.subscribeOptions;
     }
     
     // Private helper functions
     
-    private static subscribeHelper<Part>(
+    private subscribeHelper<Part>(
         path: string[],
         subscriptionFunction: LitElementStateSubscriptionFunction<Part>,
         options: SubscribeStateOptions
@@ -187,7 +185,7 @@ export class LitElementStateService<State> {
         return subscription;
     }
     
-    private static checkSubscriptionChange(subscription: LitElementStateSubscription<any>, statePartial: DeepPartial<ReducableState>) {
+    private checkSubscriptionChange(subscription: LitElementStateSubscription<any>, statePartial: State | DeepPartial<ReducableState<State>>) {
         const changedPartial = this.getChangedPartial(
             subscription.path,
             statePartial
@@ -205,7 +203,7 @@ export class LitElementStateService<State> {
     }
     
     
-    private static unsubscribe(subscription: LitElementStateSubscription<DeepPartial<State>>) {
+    private unsubscribe(subscription: LitElementStateSubscription<DeepPartial<State>>) {
         const subIndex = this.stateSubscriptions.indexOf(subscription);
         if (subIndex >= 0) {
             this.stateSubscriptions.splice(
@@ -215,9 +213,9 @@ export class LitElementStateService<State> {
         }
     }
     
-    private static getChangedPartial(
+    private getChangedPartial(
         segments: string[],
-        object: DeepPartial<State>
+        object: State | DeepPartial<ReducableState<State>>
     ): DeepPartial<State> | 'path_not_found' {
         let partial = object;
         for (const segment of segments) {
@@ -227,14 +225,14 @@ export class LitElementStateService<State> {
                 return 'path_not_found';
             }
         }
-        return partial;
+        return partial as DeepPartial<State>;
     }
     
-    private static isObject(item) {
+    private isObject(item) {
         return (item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Map) && !(item instanceof Set));
     }
-    
-    private static deepMerge(target: object, source: object) {
+
+    private deepReduce(target: State, source: ReducableState<State> | DeepPartial<ReducableState<State>>) {
         for (const key in source) {
             if (this.isObject(source[key]) &&
                 (!('_reducerMode' in source[key]) || source[key]._reducerMode === 'merge')) {
@@ -245,7 +243,7 @@ export class LitElementStateService<State> {
                         { [key]: {} }
                     );
                 }
-                this.deepMerge(
+                this.deepReduce(
                     target[key],
                     source[key]
                 );
@@ -314,6 +312,5 @@ export class LitElementStateService<State> {
         
         throw new Error('Unable to copy obj! Its type isn\'t supported.');
     }
-    
     
 }
