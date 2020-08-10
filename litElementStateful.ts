@@ -5,7 +5,7 @@ import {
     LitElementStateSubscriptionFunction,
     ReducableState,
     SubscribeStateOptions
-} from './litElementState';
+} from './index';
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
 

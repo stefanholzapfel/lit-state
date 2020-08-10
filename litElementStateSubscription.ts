@@ -1,4 +1,4 @@
-import { LitElementStateSubscriptionFunction } from './litElementState';
+import { LitElementStateSubscriptionFunction } from './index';
 import { LitElementStateService } from './litElementState.service';
 
 export class LitElementStateSubscription<P> {
