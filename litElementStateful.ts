@@ -21,7 +21,7 @@ export class LitElementStateful<State> extends LitElement {
         } else if (LitElementStateService.getGlobalInstance()) {
             this.stateService = LitElementStateService.getGlobalInstance();
         } else {
-            throw new Error('Need a LitElementState service via constructor or a global state available.')
+            throw new Error('Need a LitElementState service given via constructor or a global state available.')
         }
     }
 
@@ -37,14 +37,14 @@ export class LitElementStateful<State> extends LitElement {
     subscribeState<K1 extends keyof State>(
         k1: K1,
         subscriptionFunction: LitElementStateSubscriptionFunction<State[K1]>
-    ): LitElementStateSubscription<State[K1]> | void;
+    ): LitElementStateSubscription<State[K1]>;
     subscribeState<K1 extends keyof State,
         K2 extends keyof State[K1]>(
         k1: K1,
         k2: K2,
         subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<State[K1][K2]> | void;
+    ): LitElementStateSubscription<State[K1][K2]>;
     subscribeState<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2]>(
@@ -53,7 +53,7 @@ export class LitElementStateful<State> extends LitElement {
         k3: K3,
         subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2][K3]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<State[K1][K2][K3]> | void;
+    ): LitElementStateSubscription<State[K1][K2][K3]>;
     subscribeState<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2],
@@ -64,7 +64,7 @@ export class LitElementStateful<State> extends LitElement {
         k4: K4,
         subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2][K3][K4]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<State[K1][K2][K3][K4]> | void;
+    ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
     // Implementation
     subscribeState<Part>(
         ...params: (string | LitElementStateSubscriptionFunction<Part> | SubscribeStateOptions)[]
@@ -76,9 +76,8 @@ export class LitElementStateful<State> extends LitElement {
         }
         if (options.autoUnsubscribe) {
             this.autoUnsubscribeSubs.push(subscription);
-        } else {
-            return subscription;
         }
+        return subscription;
     }
 
     // TODO: AUTOCONNECT FEATURE THAT AUTOMATICALLY CONNECTS ALL PROPERTIES IN GIVEN STATE PATH WITH PROPERTIES ON
@@ -130,9 +129,8 @@ export class LitElementStateful<State> extends LitElement {
         const subscription = this.stateService.connect.apply(this.stateService, params);
         if (options.autoUnsubscribe) {
             this.autoUnsubscribeSubs.push(subscription);
-        } else {
-            return subscription;
         }
+        return subscription;
     }
 
     disconnectedCallback(): void {

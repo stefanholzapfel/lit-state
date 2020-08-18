@@ -27,7 +27,7 @@ export class LitElementStateService<State> {
     }
 
     private static _globalInstance;
-    static getGlobalInstance() {
+    static getGlobalInstance(): LitElementStateService<any> {
         return LitElementStateService._globalInstance;
     }
 
@@ -42,7 +42,7 @@ export class LitElementStateService<State> {
     };
     
     private stateSubscriptions: LitElementStateSubscription<any>[] = [];
-    
+
     set(statePartial: DeepPartial<ReducableState<State>>, customReducer?: CustomStateReducer<State>): void {
         if (customReducer) {
             this._state = customReducer(
@@ -219,6 +219,8 @@ export class LitElementStateService<State> {
                 subIndex,
                 1
             );
+        } else {
+            throw new Error(`Already unsubscribed ${subscription.path}!`);
         }
     }
     
@@ -323,3 +325,4 @@ export class LitElementStateService<State> {
     }
     
 }
+

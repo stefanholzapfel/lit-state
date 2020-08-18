@@ -13,7 +13,7 @@ export type CustomStateReducer<State> = (state: State, partialClone: DeepPartial
 export type StateReducerMode = 'merge' | 'replace'
 
 export interface SubscribeStateOptions {
-    getInitialValue: boolean;
+    getInitialValue?: boolean;
     autoUnsubscribe?: boolean;
 }
 
