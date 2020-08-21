@@ -1,12 +1,12 @@
-import {DeepPartial, DeepReadonly} from 'ts-essentials';
+import { DeepPartial } from 'ts-essentials';
 
 export type LitElementStateSubscriptionFunction<P> = (
     value: StateChange<P>
 ) => void;
 
 export interface StateChange<P> {
-    readonly previous: DeepReadonly<P> | null
-    readonly current: DeepReadonly<P> | null
+    readonly previous: P | null
+    readonly current: P | null
 }
 
 export type CustomStateReducer<State> = (state: State, partialClone: DeepPartial<ReducableState<State>>) => State;
