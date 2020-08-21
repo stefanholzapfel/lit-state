@@ -279,11 +279,11 @@ export class LitElementStateService<State> {
     public static deepCopy(obj) {
         let copy;
         
-        // Handle the 3 simple types, and null or undefined
-        if (null == obj || 'object' !== typeof obj) {
+        // Handle the 3 simple types, null, undefined and Promises
+        if (null == obj || 'object' !== typeof obj || obj instanceof Promise) {
             return obj;
         }
-        
+
         // Handle Date
         if (obj instanceof Date) {
             copy = new Date();
