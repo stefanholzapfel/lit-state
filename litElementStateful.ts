@@ -72,7 +72,7 @@ export class LitElementStateful<State> extends LitElement {
         ...params: (string | StateSubscriptionFunction<Part> | SubscribeStateFromElementOptions)[]
     ): LitElementStateSubscription<Part> | void {
         const subscription = this.stateService.subscribe.apply(this.stateService, params) as LitElementStateSubscription<Part>;
-        if (subscription.subscriptionOptions.autoUnsubscribe) {
+        if ((subscription.subscriptionOptions as SubscribeStateFromElementOptions).autoUnsubscribe) {
             this.autoUnsubscribeSubs.push(subscription);
         }
         return subscription;

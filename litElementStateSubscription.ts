@@ -1,4 +1,4 @@
-import {StateSubscriptionFunction, SubscribeStateOptions} from './index';
+import {StateSubscriptionFunction, SubscribeStateFromElementOptions, SubscribeStateOptions} from './index';
 import {deepCopy} from './litElementState.helpers';
 
 export class LitElementStateSubscription<StatePartial> {
@@ -8,7 +8,7 @@ export class LitElementStateSubscription<StatePartial> {
     
     private subscriptionFunction;
     private unsubscribeFunction: (subscription: LitElementStateSubscription<StatePartial>) => void;
-    subscriptionOptions: SubscribeStateOptions;
+    subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
     
     constructor(
         path: string[],
