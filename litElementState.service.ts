@@ -190,10 +190,10 @@ export class LitElementStateService<State> {
                 );
             } else {
                 if (source[key] === undefined) {
-                    source[key] = undefined;
+                    target[key] = undefined;
                 }
                 else if (source[key] === null) {
-                    source[key] = null;
+                    target[key] = null;
                 } else {
                     delete source[key]._reducerMode;
                     Object.assign(
