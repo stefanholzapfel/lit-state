@@ -134,9 +134,11 @@ export class LitElementStateService<State> {
             subscription.path,
             statePartial
         );
-        if (subscription.value && changedPartial === 'path_maybe_deleted') {
-            subscription.next(undefined);
-        } else if (changedPartial !== null && changedPartial !== undefined && changedPartial !== 'path_not_touched') {
+        if (changedPartial === null || changedPartial === undefined) {
+            if (subscription.value !== changedPartial) {
+                subscription.next(changedPartial);
+            }
+        } else if (changedPartial !== 'path_not_touched') {
             subscription.next(
                 this.getChangedPartial(
                     subscription.path,
@@ -149,20 +151,23 @@ export class LitElementStateService<State> {
     private getChangedPartial(
         segments: string[],
         object: State | DeepPartial<ReducableState<State>>
-    ): DeepPartial<State> | 'path_not_touched' | 'path_deleted' {
+    ): DeepPartial<State> | 'path_not_touched' {
         let partial = object;
-        for (const segment of segments) {
+        for (const [index, segment] of segments.entries()) {
             if (!isObject(partial)) {
-                throw new Error(`Error from subscription: Path ${ segments.join('.') } doesn't exist!`)
+                throw new Error(`Error from lit-state: Subscribed path ${ segments.join('.') } doesn't exist!`)
             }
             if (segment in partial) {
                 partial = partial[segment];
-                if (partial === null || partial === undefined) {
-                    return 'path_deleted';
+                if (partial === undefined || (partial === null && index < segments.length - 1)) {
+                    return undefined;
+                }
+                if (partial === null) {
+                    return null;
                 }
             } else {
                 return ('_reducerMode' in partial && partial['_reducerMode'] === 'replace') ?
-                    'path_deleted' : 'path_not_touched';
+                    undefined : 'path_not_touched';
             }
         }
         return partial as DeepPartial<State>;
