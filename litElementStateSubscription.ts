@@ -22,9 +22,9 @@ export class LitElementStateSubscription<P> {
     }
     
     next(value: P) {
-        // TODO: only set & emit when change in value happened and not on re-set?
+        // TODO: offer option to also trigger change when value is the same? (e.g. for sub-property setting)
         if (this.value !== value) {
-            this.previousValue = LitElementStateService.deepCopy(this.value);
+            this.previousValue = this.value;
             this.value = value;
             this.emitValue();
         }
