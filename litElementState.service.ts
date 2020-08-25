@@ -3,11 +3,10 @@ import {
     CustomStateReducer,
     StateSubscriptionFunction,
     ReducableState,
-    SubscribeStateOptions, SubscribeStateFromElementOptions, LitElementStateful
+    SubscribeStateOptions, SubscribeStateFromElementOptions
 } from './index';
 import { LitElementStateSubscription } from './litElementStateSubscription';
 import {isObject, optionsFromDefaultOrParams} from './litElementState.helpers';
-import {LitElement} from 'lit-element';
 
 export class LitElementStateService<State> {
     constructor(
@@ -123,8 +122,9 @@ export class LitElementStateService<State> {
             subscription.path,
             statePartial
         );
-        // TODO: Works properly if path was set to null from higher level?
-        if (changedPartial !== 'path_not_found') {
+        if (subscription.value && changedPartial === 'path_not_found') {
+            subscription.next(undefined);
+        } else if (changedPartial !== 'path_not_found') {
             const nextvalue = (changedPartial !== null && changedPartial !== undefined) ?
                 this.getChangedPartial(
                     subscription.path,
@@ -154,7 +154,7 @@ export class LitElementStateService<State> {
     ): DeepPartial<State> | 'path_not_found' {
         let partial = object;
         for (const segment of segments) {
-            if (segment in partial) {
+            if (partial && segment in partial) {
                 partial = partial[segment];
             } else {
                 return 'path_not_found';
