@@ -1,6 +1,6 @@
 import { DeepPartial } from 'ts-essentials';
 
-export type LitElementStateSubscriptionFunction<P> = (
+export type StateSubscriptionFunction<P> = (
     value: StateChange<P>
 ) => void;
 
@@ -14,6 +14,11 @@ export type StateReducerMode = 'merge' | 'replace'
 
 export interface SubscribeStateOptions {
     getInitialValue?: boolean;
+    pushNestedChanges?: boolean;
+    getDeepCopy?: boolean;
+}
+
+export interface SubscribeStateFromElementOptions extends SubscribeStateOptions {
     autoUnsubscribe?: boolean;
 }
 

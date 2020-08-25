@@ -1,23 +1,24 @@
-import { LitElement } from 'lit-element';
 import { DeepPartial } from 'ts-essentials';
 import {
     CustomStateReducer,
-    LitElementStateSubscriptionFunction,
+    StateSubscriptionFunction,
     ReducableState,
-    SubscribeStateOptions
+    SubscribeStateOptions, SubscribeStateFromElementOptions, LitElementStateful
 } from './index';
 import { LitElementStateSubscription } from './litElementStateSubscription';
+import {isObject, optionsFromDefaultOrParams} from './litElementState.helpers';
+import {LitElement} from 'lit-element';
 
 export class LitElementStateService<State> {
     constructor(
         initialState: State,
-        subscribeOptions?: SubscribeStateOptions,
+        defaultSubscribeOptions?: SubscribeStateFromElementOptions,
         global = false
     ) {
-        if (subscribeOptions) {
-            this.subscribeOptions = {
-                ...this.subscribeOptions,
-                ...subscribeOptions
+        if (defaultSubscribeOptions) {
+            this._defaultSubscribeStateFromElementOptions = {
+                ...this._defaultSubscribeStateFromElementOptions,
+                ...defaultSubscribeOptions
             };
         }
         this._state = initialState;
@@ -35,12 +36,17 @@ export class LitElementStateService<State> {
     get state(): State {
         return this._state;
     };
-    
-    private subscribeOptions: SubscribeStateOptions = {
+
+    private _defaultSubscribeStateFromElementOptions = {
         getInitialValue: true,
+        pushNestedChanges: false,
+        getDeepCopy: false,
         autoUnsubscribe: true
-    };
-    
+    }
+    get defaultSubscribeFromElementOptions(): Readonly<SubscribeStateFromElementOptions> {
+        return this._defaultSubscribeStateFromElementOptions;
+    }
+
     private stateSubscriptions: LitElementStateSubscription<any>[] = [];
 
     set(statePartial: DeepPartial<ReducableState<State>>, customReducer?: CustomStateReducer<State>): void {
@@ -63,14 +69,14 @@ export class LitElementStateService<State> {
     // Overloads
     subscribe<K1 extends keyof State>(
         k1: K1,
-        subscriptionFunction: LitElementStateSubscriptionFunction<State[K1]>,
+        subscriptionFunction: StateSubscriptionFunction<State[K1]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1]>;
     subscribe<K1 extends keyof State,
         K2 extends keyof State[K1]>(
         k1: K1,
         k2: K2,
-        subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2]>,
+        subscriptionFunction: StateSubscriptionFunction<State[K1][K2]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2]>;
     subscribe<K1 extends keyof State,
@@ -79,7 +85,7 @@ export class LitElementStateService<State> {
         k1: K1,
         k2: K2,
         k3: K3,
-        subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2][K3]>,
+        subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3]>;
     subscribe<K1 extends keyof State,
@@ -90,102 +96,20 @@ export class LitElementStateService<State> {
         k2: K2,
         k3: K3,
         k4: K4,
-        subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2][K3][K4]>,
+        subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3][K4]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
     // Implementation
     subscribe<Part>(
-        ...params: (string | LitElementStateSubscriptionFunction<Part> | SubscribeStateOptions)[]
+        ...params: (string | StateSubscriptionFunction<Part> | SubscribeStateOptions)[]
     ): LitElementStateSubscription<Part> {
-        let options = this.subscribeOptions;
-        if (params[params.length - 1].hasOwnProperty('getInitialValue')) {
-            options = params.pop() as SubscribeStateOptions;
-        }
-        const subscriptionFunction = params.pop() as LitElementStateSubscriptionFunction<Part>;
-        return this.subscribeHelper(
-            params as string[],
-            subscriptionFunction,
-            options
-        );
-    }
-    
-    // Overloads
-    connect<K1 extends keyof State>(
-        k1: K1,
-        propertyName: string,
-        litElement: LitElement,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<State[K1]>;
-    connect<K1 extends keyof State,
-        K2 extends keyof State[K1]>(
-        k1: K1,
-        k2: K2,
-        propertyName: string,
-        litElement: LitElement,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<State[K1][K2]>;
-    connect<K1 extends keyof State,
-        K2 extends keyof State[K1],
-        K3 extends keyof State[K1][K2]>(
-        k1: K1,
-        k2: K2,
-        k3: K3,
-        propertyName: string,
-        litElement: LitElement,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<State[K1][K2][K3]>;
-    connect<K1 extends keyof State,
-        K2 extends keyof State[K1],
-        K3 extends keyof State[K1][K2],
-        K4 extends keyof State[K1][K2][K3]>(
-        k1: K1,
-        k2: K2,
-        k3: K3,
-        k4: K4,
-        propertyName: string,
-        litElement: LitElement,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
-    // Implementation
-    connect<Part>(
-        ...params: (string | LitElement | SubscribeStateOptions)[]
-    ): LitElementStateSubscription<Part> {
-        let options = this.subscribeOptions;
-        if (params[params.length - 1].hasOwnProperty('getInitialValue')) {
-            options = params.pop() as SubscribeStateOptions;
-        }
-        const litElement = params.pop() as LitElement;
-        const propertyName = params.pop() as string;
-        const subscriptionFunction = data => {
-            if (litElement && propertyName in litElement) {
-                litElement[propertyName] = data.current;
-            } else {
-                throw new Error('LitElement or property on LitElement not found! Maybe the element was removed' +
-                    ' but connectedProperty not unsubscribed?');
-            }
-        };
-        return this.subscribeHelper(
-            params as string[],
-            subscriptionFunction,
-            options
-        );
-    }
-    
-    getSubscribeOptions(): Readonly<SubscribeStateOptions> {
-        return this.subscribeOptions;
-    }
-    
-    // Private helper functions
-    
-    private subscribeHelper<Part>(
-        path: string[],
-        subscriptionFunction: LitElementStateSubscriptionFunction<Part>,
-        options: SubscribeStateOptions
-    ): LitElementStateSubscription<Part> {
+        const options = optionsFromDefaultOrParams(params, this);
+        const subscriptionFunction = params.pop() as StateSubscriptionFunction<Part>;
         const subscription = new LitElementStateSubscription<Part>(
-            path,
+            params as string[],
             subscriptionFunction,
-            this.unsubscribe.bind(this)
+            this.unsubscribe.bind(this),
+            options
         );
         if (options.getInitialValue) {
             this.checkSubscriptionChange(subscription, this._state);
@@ -193,7 +117,7 @@ export class LitElementStateService<State> {
         this.stateSubscriptions.push(subscription);
         return subscription;
     }
-    
+
     private checkSubscriptionChange(subscription: LitElementStateSubscription<any>, statePartial: State | DeepPartial<ReducableState<State>>) {
         const changedPartial = this.getChangedPartial(
             subscription.path,
@@ -238,14 +162,10 @@ export class LitElementStateService<State> {
         }
         return partial as DeepPartial<State>;
     }
-    
-    private isObject(item) {
-        return (item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Map) && !(item instanceof Set));
-    }
 
     private deepReduce(target: State, source: ReducableState<State> | DeepPartial<ReducableState<State>>) {
         for (const key in source) {
-            if (this.isObject(source[key]) &&
+            if (isObject(source[key]) &&
                 (!('_reducerMode' in source[key]) || source[key]._reducerMode === 'merge')) {
                 delete source[key]._reducerMode;
                 if (!target[key]) {
@@ -275,54 +195,6 @@ export class LitElementStateService<State> {
         }
         return target;
     }
-    
-    public static deepCopy(obj) {
-        let copy;
-        
-        // Handle the 3 simple types, null, undefined and Promises
-        if (null == obj || 'object' !== typeof obj || obj instanceof Promise) {
-            return obj;
-        }
 
-        // Handle Date
-        if (obj instanceof Date) {
-            copy = new Date();
-            copy.setTime(obj.getTime());
-            return copy;
-        }
-        
-        // Handle Array
-        if (obj instanceof Array) {
-            copy = [];
-            for (let i = 0,
-                     len = obj.length; i < len; i++) {
-                copy[i] = this.deepCopy(obj[i]);
-            }
-            return copy;
-        }
-        
-        // Handle Map
-        if (obj instanceof Map) {
-            const copy = new Map();
-            obj.forEach((value, key, map) => {
-                copy.set(key, this.deepCopy(value));
-            });
-            return copy;
-        }
-        
-        // Handle Object
-        if (obj instanceof Object) {
-            copy = {};
-            for (const attr in obj) {
-                if (obj.hasOwnProperty(attr)) {
-                    copy[attr] = this.deepCopy(obj[attr]);
-                }
-            }
-            return copy;
-        }
-        
-        throw new Error('Unable to copy obj! Its type isn\'t supported.');
-    }
-    
 }
 

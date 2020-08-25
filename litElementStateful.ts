@@ -2,12 +2,13 @@ import {LitElement} from 'lit-element';
 import {DeepPartial} from 'ts-essentials';
 import {
     CustomStateReducer,
-    LitElementStateSubscriptionFunction,
+    StateSubscriptionFunction,
     ReducableState,
-    SubscribeStateOptions
+    SubscribeStateFromElementOptions
 } from './index';
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
+import {optionsFromDefaultOrParams} from './litElementState.helpers';
 
 export class LitElementStateful<State> extends LitElement {
 
@@ -26,7 +27,7 @@ export class LitElementStateful<State> extends LitElement {
     }
 
     get state(): State {
-        return this.state;
+        return this.stateService.state;
     };
 
     setState(statePartial: DeepPartial<ReducableState<State>>, customReducer?: CustomStateReducer<State>) {
@@ -36,14 +37,15 @@ export class LitElementStateful<State> extends LitElement {
     // Overloads
     subscribeState<K1 extends keyof State>(
         k1: K1,
-        subscriptionFunction: LitElementStateSubscriptionFunction<State[K1]>
+        subscriptionFunction: StateSubscriptionFunction<State[K1]>,
+        options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1]>;
     subscribeState<K1 extends keyof State,
         K2 extends keyof State[K1]>(
         k1: K1,
         k2: K2,
-        subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2]>,
-        options?: SubscribeStateOptions
+        subscriptionFunction: StateSubscriptionFunction<State[K1][K2]>,
+        options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1][K2]>;
     subscribeState<K1 extends keyof State,
         K2 extends keyof State[K1],
@@ -51,8 +53,8 @@ export class LitElementStateful<State> extends LitElement {
         k1: K1,
         k2: K2,
         k3: K3,
-        subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2][K3]>,
-        options?: SubscribeStateOptions
+        subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3]>,
+        options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1][K2][K3]>;
     subscribeState<K1 extends keyof State,
         K2 extends keyof State[K1],
@@ -62,19 +64,15 @@ export class LitElementStateful<State> extends LitElement {
         k2: K2,
         k3: K3,
         k4: K4,
-        subscriptionFunction: LitElementStateSubscriptionFunction<State[K1][K2][K3][K4]>,
-        options?: SubscribeStateOptions
+        subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3][K4]>,
+        options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
     // Implementation
     subscribeState<Part>(
-        ...params: (string | LitElementStateSubscriptionFunction<Part> | SubscribeStateOptions)[]
+        ...params: (string | StateSubscriptionFunction<Part> | SubscribeStateFromElementOptions)[]
     ): LitElementStateSubscription<Part> | void {
-        const subscription = this.stateService.subscribe.apply(this.stateService, params);
-        let options = this.stateService.getSubscribeOptions();
-        if (params[params.length - 1].hasOwnProperty('getInitialValue')) {
-            options = params.pop() as SubscribeStateOptions;
-        }
-        if (options.autoUnsubscribe) {
+        const subscription = this.stateService.subscribe.apply(this.stateService, params) as LitElementStateSubscription<Part>;
+        if (subscription.subscriptionOptions.autoUnsubscribe) {
             this.autoUnsubscribeSubs.push(subscription);
         }
         return subscription;
@@ -87,14 +85,14 @@ export class LitElementStateful<State> extends LitElement {
     connectState<K1 extends keyof State>(
         k1: K1,
         propertyName: string,
-        options?: SubscribeStateOptions
+        options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1]>;
     connectState<K1 extends keyof State,
         K2 extends keyof State[K1]>(
         k1: K1,
         k2: K2,
         propertyName: string,
-        options?: SubscribeStateOptions
+        options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1][K2]>;
     connectState<K1 extends keyof State,
         K2 extends keyof State[K1],
@@ -103,7 +101,7 @@ export class LitElementStateful<State> extends LitElement {
         k2: K2,
         k3: K3,
         propertyName: string,
-        options?: SubscribeStateOptions
+        options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1][K2][K3]>;
     connectState<K1 extends keyof State,
         K2 extends keyof State[K1],
@@ -113,25 +111,32 @@ export class LitElementStateful<State> extends LitElement {
         k2: K2,
         k3: K3,
         k4: K4,
-        propertyName: any,
-        options?: SubscribeStateOptions
+        propertyName: string,
+        options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
     // Implementation
     connectState<Part>(
-        ...params: (string | LitElement | SubscribeStateOptions)[]
+        ...params: (string | SubscribeStateFromElementOptions)[]
     ): LitElementStateSubscription<Part> {
-        let options = this.stateService.getSubscribeOptions();
-        if (params[params.length - 1].hasOwnProperty('getInitialValue')) {
-            options = params.pop() as SubscribeStateOptions;
+        const options = optionsFromDefaultOrParams(params, this.stateService);
+        const propertyName = params.pop() as string;
+        const subscriptionFunction = data => {
+            if (propertyName in this) {
+                this[propertyName] = data.current;
+            } else {
+                throw new Error(`Property ${propertyName} not found on LitElement!`);
+            }
         }
-        params.push(this);
+        (params as any).push(subscriptionFunction);
         params.push(options);
-        const subscription = this.stateService.connect.apply(this.stateService, params);
-        if (options.autoUnsubscribe) {
+        const subscription = this.stateService.subscribe.apply(this.stateService, params);
+        if (subscription.options.autoUnsubscribe) {
             this.autoUnsubscribeSubs.push(subscription);
         }
         return subscription;
     }
+
+
 
     disconnectedCallback(): void {
         super.disconnectedCallback();

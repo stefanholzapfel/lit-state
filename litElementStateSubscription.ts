@@ -1,31 +1,35 @@
-import { LitElementStateSubscriptionFunction } from './index';
-import { LitElementStateService } from './litElementState.service';
+import {StateSubscriptionFunction, SubscribeStateOptions} from './index';
+import {deepCopy} from './litElementState.helpers';
 
-export class LitElementStateSubscription<P> {
-    previousValue: P = null;
-    value: P = null;
+export class LitElementStateSubscription<StatePartial> {
+    previousValue: StatePartial = null;
+    value: StatePartial = null;
     path: string[];
     
     private subscriptionFunction;
-    private unsubscribeFunction: (subscription: LitElementStateSubscription<P>) => void;
+    private unsubscribeFunction: (subscription: LitElementStateSubscription<StatePartial>) => void;
+    subscriptionOptions: SubscribeStateOptions;
     
     constructor(
         path: string[],
-        subscriptionFunction: LitElementStateSubscriptionFunction<P>,
+        subscriptionFunction: StateSubscriptionFunction<StatePartial>,
         unsubscriptionFunction: (
             subscription: LitElementStateSubscription<any>
-        ) => void
+        ) => void,
+        subscriptionOptions?: SubscribeStateOptions
     ) {
         this.path = path;
         this.subscriptionFunction = subscriptionFunction;
         this.unsubscribeFunction = unsubscriptionFunction;
+        this.subscriptionOptions = subscriptionOptions;
     }
     
-    next(value: P) {
-        // TODO: offer option to also trigger change when value is the same? (e.g. for sub-property setting)
-        if (this.value !== value) {
-            this.previousValue = this.value;
-            this.value = value;
+    next(value: StatePartial) {
+        if (this.value !== value || this.subscriptionOptions.pushNestedChanges) {
+            this.previousValue = (this.value === value || this.subscriptionOptions.getDeepCopy) ?
+                this.value : deepCopy(this.value);
+            this.value = this.subscriptionOptions.getDeepCopy ?
+                deepCopy(value) : value;
             this.emitValue();
         }
     }
