@@ -1,4 +1,4 @@
-import {LitElementStateService, SubscribeStateFromElementOptions, SubscribeStateOptions} from './index';
+import { LitElementStateService, SubscribeStateFromElementOptions } from './index';
 
 export const isObject = (item) =>  {
     return (item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Map) && !(item instanceof Set));
@@ -24,7 +24,7 @@ export const deepCopy = (obj) =>  {
         copy = [];
         for (let i = 0,
                  len = obj.length; i < len; i++) {
-            copy[i] = this.deepCopy(obj[i]);
+            copy[i] = deepCopy(obj[i]);
         }
         return copy;
     }
@@ -33,7 +33,7 @@ export const deepCopy = (obj) =>  {
     if (obj instanceof Map) {
         const copy = new Map();
         obj.forEach((value, key, map) => {
-            copy.set(key, this.deepCopy(value));
+            copy.set(key, deepCopy(value));
         });
         return copy;
     }
@@ -43,7 +43,7 @@ export const deepCopy = (obj) =>  {
         copy = {};
         for (const attr in obj) {
             if (obj.hasOwnProperty(attr)) {
-                copy[attr] = this.deepCopy(obj[attr]);
+                copy[attr] = deepCopy(obj[attr]);
             }
         }
         return copy;
