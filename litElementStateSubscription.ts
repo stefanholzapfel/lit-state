@@ -23,9 +23,11 @@ export class LitElementStateSubscription<P> {
     
     next(value: P) {
         // TODO: only set & emit when change in value happened and not on re-set?
-        this.previousValue = LitElementStateService.deepCopy(this.value);
-        this.value = value;
-        this.emitValue();
+        if (this.value !== value) {
+            this.previousValue = LitElementStateService.deepCopy(this.value);
+            this.value = value;
+            this.emitValue();
+        }
     }
     
     emitValue() {
