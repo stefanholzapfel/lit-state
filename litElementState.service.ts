@@ -117,25 +117,6 @@ export class LitElementStateService<State> {
         return subscription;
     }
 
-    private checkSubscriptionChange(subscription: LitElementStateSubscription<any>, statePartial: State | DeepPartial<ReducableState<State>>) {
-        const changedPartial = this.getChangedPartial(
-            subscription.path,
-            statePartial
-        );
-        if (subscription.value && changedPartial === 'path_not_found') {
-            subscription.next(undefined);
-        } else if (changedPartial !== 'path_not_found') {
-            const nextvalue = (changedPartial !== null && changedPartial !== undefined) ?
-                this.getChangedPartial(
-                    subscription.path,
-                    this._state
-                ) :
-                null;
-            subscription.next(nextvalue);
-        }
-    }
-    
-    
     private unsubscribe(subscription: LitElementStateSubscription<DeepPartial<State>>) {
         const subIndex = this.stateSubscriptions.indexOf(subscription);
         if (subIndex >= 0) {
@@ -147,17 +128,41 @@ export class LitElementStateService<State> {
             throw new Error(`Already unsubscribed ${subscription.path}!`);
         }
     }
-    
+
+    private checkSubscriptionChange(subscription: LitElementStateSubscription<any>, statePartial: State | DeepPartial<ReducableState<State>>) {
+        const changedPartial = this.getChangedPartial(
+            subscription.path,
+            statePartial
+        );
+        if (subscription.value && changedPartial === 'path_maybe_deleted') {
+            subscription.next(undefined);
+        } else if (changedPartial !== null && changedPartial !== undefined && changedPartial !== 'path_not_touched') {
+            subscription.next(
+                this.getChangedPartial(
+                    subscription.path,
+                    this._state
+                )
+            );
+        }
+    }
+
     private getChangedPartial(
         segments: string[],
         object: State | DeepPartial<ReducableState<State>>
-    ): DeepPartial<State> | 'path_not_found' {
+    ): DeepPartial<State> | 'path_not_touched' | 'path_deleted' {
         let partial = object;
         for (const segment of segments) {
-            if (partial && segment in partial) {
+            if (!isObject(partial)) {
+                throw new Error(`Error from subscription: Path ${ segments.join('.') } doesn't exist!`)
+            }
+            if (segment in partial) {
                 partial = partial[segment];
+                if (partial === null || partial === undefined) {
+                    return 'path_deleted';
+                }
             } else {
-                return 'path_not_found';
+                return ('_reducerMode' in partial && partial['_reducerMode'] === 'replace') ?
+                    'path_deleted' : 'path_not_touched';
             }
         }
         return partial as DeepPartial<State>;
