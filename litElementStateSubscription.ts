@@ -26,10 +26,8 @@ export class LitElementStateSubscription<StatePartial> {
     
     next(value: StatePartial) {
         if (this.value !== value || this.subscriptionOptions.pushNestedChanges) {
-            this.previousValue = (this.value === value || this.subscriptionOptions.getDeepCopy) ?
-                this.value : deepCopy(this.value);
-            this.value = this.subscriptionOptions.getDeepCopy ?
-                deepCopy(value) : value;
+            this.previousValue = deepCopy(this.value);
+            this.value = value;
             this.emitValue();
         }
     }
@@ -38,7 +36,8 @@ export class LitElementStateSubscription<StatePartial> {
         this.subscriptionFunction(
             {
                 previous: this.previousValue,
-                current: this.value
+                current: this.subscriptionOptions.getDeepCopy ?
+                    deepCopy(this.value) : this.value
             }
         );
     }
