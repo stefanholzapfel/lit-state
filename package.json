@@ -1,6 +1,6 @@
 {
   "name": "lit-state",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "A reactive state management for LitElement",
   "repository": {
     "type": "git",
@@ -11,9 +11,9 @@
   "author": "Stefan Holzapfel",
   "license": "MIT",
   "dependencies": {
-    "lit-element": "^2.3.1"
+    "lit-element": "^2.4.0"
   },
   "devDependencies": {
-    "ts-essentials": "^6.0.7"
+    "ts-essentials": "^7.0.0"
   }
 }
