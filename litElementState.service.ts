@@ -136,14 +136,14 @@ export class LitElementStateService<State> {
         );
         if (changedPartial === null || changedPartial === undefined) {
             if (subscription.value !== changedPartial || initial) {
-                subscription.next(changedPartial);
+                subscription.next(changedPartial, initial);
             }
         } else if (changedPartial !== 'path_not_touched') {
             subscription.next(
                 this.getChangedPartial(
                     subscription.path,
                     this._state
-                )
+                ), initial
             );
         }
     }
