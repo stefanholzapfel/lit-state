@@ -138,6 +138,8 @@ export class LitElementStateService<State> {
             if (subscription.value !== changedPartial || initial) {
                 subscription.next(changedPartial, initial);
             }
+        } else if (changedPartial === 'path_not_touched' && initial) {
+            subscription.next(null, true);
         } else if (changedPartial !== 'path_not_touched') {
             subscription.next(
                 this.getChangedPartial(
