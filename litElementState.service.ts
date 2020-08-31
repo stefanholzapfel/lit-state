@@ -64,7 +64,7 @@ export class LitElementStateService<State> {
             this.checkSubscriptionChange(subscription, statePartial);
         }
     };
-    
+
     // Overloads
     subscribe<K1 extends keyof State>(
         k1: K1,
@@ -111,7 +111,7 @@ export class LitElementStateService<State> {
             options
         );
         if (options.getInitialValue) {
-            this.checkSubscriptionChange(subscription, this._state);
+            this.checkSubscriptionChange(subscription, this._state, true);
         }
         this.stateSubscriptions.push(subscription);
         return subscription;
@@ -129,13 +129,13 @@ export class LitElementStateService<State> {
         }
     }
 
-    private checkSubscriptionChange(subscription: LitElementStateSubscription<any>, statePartial: State | DeepPartial<ReducableState<State>>) {
+    private checkSubscriptionChange(subscription: LitElementStateSubscription<any>, statePartial: State | DeepPartial<ReducableState<State>>, initial = false) {
         const changedPartial = this.getChangedPartial(
             subscription.path,
             statePartial
         );
         if (changedPartial === null || changedPartial === undefined) {
-            if (subscription.value !== changedPartial) {
+            if (subscription.value !== changedPartial || initial) {
                 subscription.next(changedPartial);
             }
         } else if (changedPartial !== 'path_not_touched') {
@@ -207,4 +207,3 @@ export class LitElementStateService<State> {
     }
 
 }
-

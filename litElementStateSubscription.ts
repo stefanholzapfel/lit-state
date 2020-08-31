@@ -24,8 +24,8 @@ export class LitElementStateSubscription<StatePartial> {
         this.subscriptionOptions = subscriptionOptions;
     }
     
-    next(value: StatePartial) {
-        if (this.value !== value || this.subscriptionOptions.pushNestedChanges) {
+    next(value: StatePartial, initial = false) {
+        if (this.value !== value || this.subscriptionOptions.pushNestedChanges || initial) {
             this.previousValue = deepCopy(this.value);
             this.value = value;
             this.emitValue();
