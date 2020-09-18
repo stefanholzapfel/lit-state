@@ -122,7 +122,9 @@ export class LitElementStateful<State> extends LitElement {
         const propertyName = params.pop() as string;
         const subscriptionFunction = data => {
             if (propertyName in this) {
+                const requestUpdate = this[propertyName] === data.current;
                 this[propertyName] = data.current;
+                if (requestUpdate) { this.requestUpdate(); }
             } else {
                 throw new Error(`Property ${propertyName} not found on LitElement!`);
             }
