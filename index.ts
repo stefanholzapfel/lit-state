@@ -14,6 +14,7 @@ export type StateReducerMode = 'merge' | 'replace'
 
 export interface SubscribeStateOptions {
     getInitialValue?: boolean;
+    // Changes where the object reference is not changed but any sub property (or the object itself is re-assigned) will trigger an change
     pushNestedChanges?: boolean;
     getDeepCopy?: boolean;
 }

@@ -81,6 +81,8 @@ export class LitElementStateful<State> extends LitElement {
     // TODO: AUTOCONNECT FEATURE THAT AUTOMATICALLY CONNECTS ALL PROPERTIES IN GIVEN STATE PATH WITH PROPERTIES ON
     //  ELEMENT (IF PRESENT)?
 
+    // TODO: Allow to subscribe to an element of an array (give a matcher function).
+
     // Overloads
     connectState<K1 extends keyof State>(
         k1: K1,

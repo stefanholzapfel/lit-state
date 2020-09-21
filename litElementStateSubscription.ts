@@ -1,18 +1,18 @@
 import {StateSubscriptionFunction, SubscribeStateFromElementOptions, SubscribeStateOptions} from './index';
 import {deepCopy} from './litElementState.helpers';
 
-export class LitElementStateSubscription<StatePartial> {
-    previousValue: StatePartial = null;
-    value: StatePartial = null;
+export class LitElementStateSubscription<SubscribedType> {
+    previousValue: SubscribedType = null;
+    value: SubscribedType = null;
     path: string[];
     
     private subscriptionFunction;
-    private unsubscribeFunction: (subscription: LitElementStateSubscription<StatePartial>) => void;
+    private unsubscribeFunction: (subscription: LitElementStateSubscription<SubscribedType>) => void;
     subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
     
     constructor(
         path: string[],
-        subscriptionFunction: StateSubscriptionFunction<StatePartial>,
+        subscriptionFunction: StateSubscriptionFunction<SubscribedType>,
         unsubscriptionFunction: (
             subscription: LitElementStateSubscription<any>
         ) => void,
@@ -24,7 +24,7 @@ export class LitElementStateSubscription<StatePartial> {
         this.subscriptionOptions = subscriptionOptions;
     }
     
-    next(value: StatePartial, initial = false) {
+    next(value: SubscribedType, initial = false) {
         if (this.value !== value || this.subscriptionOptions.pushNestedChanges || initial) {
             this.previousValue = deepCopy(this.value);
             this.value = value;
