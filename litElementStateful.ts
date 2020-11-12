@@ -140,8 +140,6 @@ export class LitElementStateful<State> extends LitElementEnhanced {
         return subscription;
     }
 
-
-
     disconnectedCallback(): void {
         super.disconnectedCallback();
         this.autoUnsubscribeSubs.forEach(subscription => subscription.unsubscribe())

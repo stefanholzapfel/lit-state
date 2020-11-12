@@ -177,7 +177,7 @@ export class LitElementStateService<State> {
 
     private deepReduce(target: State, source: ReducableState<State> | DeepPartial<ReducableState<State>>) {
         for (const key in source) {
-            if (isObject(source[key]) &&
+            if (isObject(source[key]) && !(source[key] instanceof Promise) &&
                 (!('_reducerMode' in source[key]) || source[key]._reducerMode === 'merge')) {
                 delete source[key]._reducerMode;
                 if (!target[key]) {
