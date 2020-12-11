@@ -116,6 +116,34 @@ export class LitElementStateful<State> extends LitElementEnhanced {
         propertyName: string,
         options?: SubscribeStateFromElementOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
+    connectState<K1 extends keyof State,
+        K2 extends keyof State[K1],
+        K3 extends keyof State[K1][K2],
+        K4 extends keyof State[K1][K2][K3],
+        K5 extends keyof State[K1][K2][K3][K4]>(
+        k1: K1,
+        k2: K2,
+        k3: K3,
+        k4: K4,
+        k5: K5,
+        propertyName: string,
+        options?: SubscribeStateFromElementOptions
+    ): LitElementStateSubscription<State[K1][K2][K3][K4][K5]>;
+    connectState<K1 extends keyof State,
+        K2 extends keyof State[K1],
+        K3 extends keyof State[K1][K2],
+        K4 extends keyof State[K1][K2][K3],
+        K5 extends keyof State[K1][K2][K3][K4],
+        K6 extends keyof State[K1][K2][K3][K4][K5]>(
+        k1: K1,
+        k2: K2,
+        k3: K3,
+        k4: K4,
+        k5: K5,
+        k6: K6,
+        propertyName: string,
+        options?: SubscribeStateFromElementOptions
+    ): LitElementStateSubscription<State[K1][K2][K3][K4][K5][K6]>;
     // Implementation
     connectState<Part>(
         ...params: (string | SubscribeStateFromElementOptions)[]
