@@ -67,3 +67,10 @@ export const optionsFromDefaultOrParams = (params: any[], service: LitElementSta
     }
     return options;
 }
+
+export const exceptFromDeepReduce: (obj: any) => boolean = (obj) => {
+    return (
+        obj instanceof Promise ||
+        obj instanceof AbortController
+    );
+}

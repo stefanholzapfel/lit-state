@@ -6,7 +6,7 @@ import {
     SubscribeStateOptions, SubscribeStateFromElementOptions
 } from './index';
 import { LitElementStateSubscription } from './litElementStateSubscription';
-import {isObject, optionsFromDefaultOrParams} from './litElementState.helpers';
+import {exceptFromDeepReduce, isObject, optionsFromDefaultOrParams} from './litElementState.helpers';
 
 export class LitElementStateService<State> {
     constructor(
@@ -205,7 +205,7 @@ export class LitElementStateService<State> {
 
     private deepReduce(target: State, source: ReducableState<State> | DeepPartial<ReducableState<State>>) {
         for (const key in source) {
-            if (isObject(source[key]) && !(source[key] instanceof Promise) &&
+            if (isObject(source[key]) && !(exceptFromDeepReduce(source[key])) &&
                 (!('_reducerMode' in source[key]) || source[key]._reducerMode === 'merge')) {
                 delete source[key]._reducerMode;
                 if (!target[key]) {
