@@ -50,7 +50,7 @@ export interface Author {
 ```
 You can nest the state as deep as you want.
 
-Somewhere in your app (before using the state of course), instantiate a lit-state Service via:
+Somewhere in your app (before using the state of course), instantiate a LitElementStateService via:
 ```
 new LitElementStateService<State>({
                 app: {
@@ -61,7 +61,7 @@ new LitElementStateService<State>({
             undefined,
             true));
 ```
-You can either hold a reference to the newly create service or set the global flag to "true" (third parameter).
+You can either hold a reference to the newly created service or set the global flag to "true" (third parameter).
 With the global flag set, lit-state will hold a reference for you and use it as default service (more on that later).
 
 The second param overwrites the default options for all subscriptions to the state:
