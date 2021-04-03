@@ -78,7 +78,7 @@ The second param overwrites the default options for all subscriptions to the sta
 
 There are two ways to consume the state:
 
-##1. Directly
+## 1. Directly
 Just use the state via a reference:
 ```
 litService.state() // Returns the whole State object
