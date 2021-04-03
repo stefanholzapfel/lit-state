@@ -6,7 +6,7 @@ import {
     SubscribeStateOptions, SubscribeStateFromElementOptions
 } from './index';
 import { LitElementStateSubscription } from './litElementStateSubscription';
-import {exceptFromDeepReduce, isObject, optionsFromDefaultOrParams} from './litElementState.helpers';
+import {isExceptionFromDeepReduce, isObject, optionsFromDefaultOrParams} from './litElementState.helpers';
 
 export class LitElementStateService<State> {
     constructor(
@@ -67,23 +67,23 @@ export class LitElementStateService<State> {
 
     // Overloads
     subscribe<K1 extends keyof State>(
-        k1: K1,
+        k1: K1 | ((array: State[K1]) => boolean),
         subscriptionFunction: StateSubscriptionFunction<State[K1]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1]>;
     subscribe<K1 extends keyof State,
         K2 extends keyof State[K1]>(
-        k1: K1,
-        k2: K2,
+        k1: K1 | ((array: State[K1]) => boolean),
+        k2: K2 | ((array: State[K1][K2]) => boolean),
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2]>;
     subscribe<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2]>(
-        k1: K1,
-        k2: K2,
-        k3: K3,
+        k1: K1 | ((array: State[K1]) => boolean),
+        k2: K2 | ((array: State[K1][K2]) => boolean),
+        k3: K3 | ((array: State[K1][K2][K3]) => boolean),
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3]>;
@@ -91,10 +91,10 @@ export class LitElementStateService<State> {
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2],
         K4 extends keyof State[K1][K2][K3]>(
-        k1: K1,
-        k2: K2,
-        k3: K3,
-        k4: K4,
+        k1: K1 | ((array: State[K1]) => boolean),
+        k2: K2 | ((array: State[K1][K2]) => boolean),
+        k3: K3 | ((array: State[K1][K2][K3]) => boolean),
+        k4: K4 | ((array: State[K1][K2][K3][K4]) => boolean),
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3][K4]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
@@ -103,11 +103,11 @@ export class LitElementStateService<State> {
         K3 extends keyof State[K1][K2],
         K4 extends keyof State[K1][K2][K3],
         K5 extends keyof State[K1][K2][K3][K4]>(
-        k1: K1,
-        k2: K2,
-        k3: K3,
-        k4: K4,
-        k5: K5,
+        k1: K1 | ((array: State[K1]) => boolean),
+        k2: K2 | ((array: State[K1][K2]) => boolean),
+        k3: K3 | ((array: State[K1][K2][K3]) => boolean),
+        k4: K4 | ((array: State[K1][K2][K3][K4]) => boolean),
+        k5: K5 | ((array: State[K1][K2][K3][K4][K5]) => boolean),
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3][K4][K5]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4][K5]>;
@@ -117,12 +117,12 @@ export class LitElementStateService<State> {
         K4 extends keyof State[K1][K2][K3],
         K5 extends keyof State[K1][K2][K3][K4],
         K6 extends keyof State[K1][K2][K3][K4][K5]>(
-        k1: K1,
-        k2: K2,
-        k3: K3,
-        k4: K4,
-        k5: K5,
-        k6: K6,
+        k1: K1 | ((array: State[K1]) => boolean),
+        k2: K2 | ((array: State[K1][K2]) => boolean),
+        k3: K3 | ((array: State[K1][K2][K3]) => boolean),
+        k4: K4 | ((array: State[K1][K2][K3][K4]) => boolean),
+        k5: K5 | ((array: State[K1][K2][K3][K4][K5]) => boolean),
+        k6: K6 | ((array: State[K1][K2][K3][K4][K5][K6]) => boolean),
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3][K4][K5][K6]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4][K5][K6]>;
@@ -205,7 +205,7 @@ export class LitElementStateService<State> {
 
     private deepReduce(target: State, source: ReducableState<State> | DeepPartial<ReducableState<State>>) {
         for (const key in source) {
-            if (isObject(source[key]) && !(exceptFromDeepReduce(source[key])) &&
+            if (isObject(source[key]) && !(isExceptionFromDeepReduce(source[key])) &&
                 (!('_reducerMode' in source[key]) || source[key]._reducerMode === 'merge')) {
                 delete source[key]._reducerMode;
                 if (!target[key]) {

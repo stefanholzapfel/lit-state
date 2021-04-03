@@ -10,11 +10,11 @@ export interface StateChange<P> {
 }
 
 export type CustomStateReducer<State> = (state: State, partialClone: DeepPartial<ReducableState<State>>) => State;
-export type StateReducerMode = 'merge' | 'replace'
+export type StateReducerMode = 'merge' | 'replace';
 
 export interface SubscribeStateOptions {
     getInitialValue?: boolean;
-    // Changes where the object reference is not changed but any sub property (or the object itself is re-assigned) will trigger an change
+    // Set true to trigger changes when a sub-property of a subscribed property changes
     pushNestedChanges?: boolean;
     getDeepCopy?: boolean;
 }
