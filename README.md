@@ -74,11 +74,11 @@ The second param overwrites the default options for all subscriptions to the sta
 }
 ```
 
-#Consume state
+# Consume state
 
 There are two ways to consume the state:
 
-##1. Directly
+## 1. Directly
 Just use the state via a reference:
 ```
 litService.state() // Returns the whole State object
@@ -101,7 +101,7 @@ Don't forget to unsubscribe, or you get memory leaks:
 subscription.unsubscribe();
 ```
 
-##2. In lit-element
+## 2. In lit-element
 lit-state comes with a class that extends LitElement. Create your lit-element like this:
 ```
 export class MyComponent extends LitElementStateful<State> {
@@ -145,7 +145,7 @@ When I find some time I plan to create a lit-element 3 controller for that featu
 
 # Manipulate state
 
-##1. Directly
+## 1. Directly
 Again, use the reference kept from instantiation.
 
 To set new values in the state, just provide the new partial you want to replace, e.g.:
@@ -221,7 +221,7 @@ stateService.set({
 I'm currently working on array handling, but for now array entries cannot be subscribed or manipulated individually.
 Arrays are for now always treated as primitives.
 
-##2. In lit-element
+## 2. In lit-element
 
 Same as using directly, just use the method ```this.setState()``` instead.
 
