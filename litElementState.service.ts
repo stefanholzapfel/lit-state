@@ -20,17 +20,19 @@ export class LitElementStateService<State> {
         config?: StateConfig
     ) {
         this.config = {
-            global: !!config.global,
+            global: !!config?.global,
             defaultSubscribeOptions: {
                 getInitialValue: true,
                 pushNestedChanges: false,
                 getDeepCopy: false,
                 autoUnsubscribe: true,
-                ...config.defaultSubscribeOptions
+                ...config?.defaultSubscribeOptions
             },
-            cache: {
-                prefix: config.cache.prefix,
-                load: config.cache.load ? config.cache.load : []
+            ...config?.cache && {
+                cache: {
+                    prefix: config.cache.prefix,
+                    load: config.cache.load ? config.cache.load : []
+                }
             }
         }
 
