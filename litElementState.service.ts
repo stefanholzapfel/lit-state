@@ -240,7 +240,9 @@ export class LitElementStateService<State> {
                     }
                 } else {
                     delete source[key]._reducerMode;
-                    cacheHandler.set(cache.path, source[key]);
+                    if (cache) {
+                        cacheHandler.set(cache.path, source[key]);
+                    }
                     Object.assign(
                         target,
                         {[key]: source[key]}
