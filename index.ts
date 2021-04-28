@@ -1,4 +1,17 @@
-import { DeepPartial } from 'ts-essentials';
+export interface StateConfig {
+    cache?: {
+        prefix?: string;
+        load?: CacheMode[];
+    };
+    defaultSubscribeOptions?: SubscribeStateFromElementOptions;
+    global: boolean;
+}
+
+export interface CacheHandler {
+    set(path: string[], value: any);
+    unset(path: string[]);
+    load(path: string[]): any;
+}
 
 export type StateSubscriptionFunction<P> = (
     value: StateChange<P>
@@ -9,8 +22,8 @@ export interface StateChange<P> {
     readonly current: P | null
 }
 
-export type CustomStateReducer<State> = (state: State, partialClone: DeepPartial<ReducableState<State>>) => State;
 export type StateReducerMode = 'merge' | 'replace';
+export type CacheMode = 'localStorage';
 
 export interface SubscribeStateOptions {
     getInitialValue?: boolean;

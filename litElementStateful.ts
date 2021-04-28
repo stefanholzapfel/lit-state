@@ -1,9 +1,8 @@
 import {DeepPartial} from 'ts-essentials';
 import {
-    CustomStateReducer,
     StateSubscriptionFunction,
     ReducableState,
-    SubscribeStateFromElementOptions
+    SubscribeStateFromElementOptions, CacheMode
 } from './index';
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
@@ -30,8 +29,8 @@ export class LitElementStateful<State> extends LitElementEnhanced {
         return this.stateService.state;
     };
 
-    setState(statePartial: DeepPartial<ReducableState<State>>, customReducer?: CustomStateReducer<State>) {
-        this.stateService.set(statePartial, customReducer);
+    setState(statePartial: DeepPartial<ReducableState<State>>, cache?: CacheMode) {
+        this.stateService.set(statePartial, cache);
     }
 
     // Overloads

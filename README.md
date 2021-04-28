@@ -58,10 +58,11 @@ new LitElementStateService<State>({
                     mobile: false
                 }
             },
-            undefined,
-            true));
+            {
+                global: true
+            }));
 ```
-You can either hold a reference to the newly created service or set the global flag to "true" (third parameter).
+You can either hold a reference to the newly created service or set the global flag in the state config to "true".
 With the global flag set, lit-state will hold a reference for you and use it as default service (more on that later).
 
 The second param overwrites the default options for all subscriptions to the state:

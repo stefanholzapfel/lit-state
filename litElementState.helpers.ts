@@ -53,7 +53,7 @@ export const deepCopy = (obj) =>  {
 }
 
 export const optionsFromDefaultOrParams = (params: any[], service: LitElementStateService<any>): SubscribeStateFromElementOptions => {
-    let options = service.defaultSubscribeFromElementOptions;
+    let options = service.config.defaultSubscribeOptions;
     if (
         params[params.length - 1].hasOwnProperty('getInitialValue') ||
         params[params.length - 1].hasOwnProperty('pushNestedChanges') ||

@@ -1,65 +1,67 @@
-import { DeepPartial } from 'ts-essentials';
+import {DeepPartial} from 'ts-essentials';
 import {
-    CustomStateReducer,
-    StateSubscriptionFunction,
+    CacheHandler,
+    CacheMode,
     ReducableState,
-    SubscribeStateOptions, SubscribeStateFromElementOptions
+    StateConfig,
+    StateSubscriptionFunction,
+    SubscribeStateOptions
 } from './index';
-import { LitElementStateSubscription } from './litElementStateSubscription';
+import {LitElementStateSubscription} from './litElementStateSubscription';
 import {isExceptionFromDeepReduce, isObject, optionsFromDefaultOrParams} from './litElementState.helpers';
+import {LocalStorageCacheHandler} from './cache.handler';
 
 export class LitElementStateService<State> {
+    private static _globalInstance;
+    private stateSubscriptions: LitElementStateSubscription<any>[] = [];
+
     constructor(
-        initialState: State,
-        defaultSubscribeOptions?: SubscribeStateFromElementOptions,
-        global = false
+        initialState?: State,
+        config?: StateConfig
     ) {
-        if (defaultSubscribeOptions) {
-            this._defaultSubscribeStateFromElementOptions = {
-                ...this._defaultSubscribeStateFromElementOptions,
-                ...defaultSubscribeOptions
-            };
+        this.config = {
+            global: !!config.global,
+            defaultSubscribeOptions: {
+                getInitialValue: true,
+                pushNestedChanges: false,
+                getDeepCopy: false,
+                autoUnsubscribe: true,
+                ...config.defaultSubscribeOptions
+            },
+            cache: {
+                prefix: config.cache.prefix,
+                load: config.cache.load ? config.cache.load : []
+            }
         }
-        this._state = initialState;
-        if (global) {
+
+        if (this.config.global) {
             LitElementStateService._globalInstance = this;
         }
-    }
 
-    private static _globalInstance;
-    static getGlobalInstance(): LitElementStateService<any> {
-        return LitElementStateService._globalInstance;
+        this._state = initialState;
     }
 
     private _state: State;
+
     get state(): State {
         return this._state;
     };
 
-    private _defaultSubscribeStateFromElementOptions = {
-        getInitialValue: true,
-        pushNestedChanges: false,
-        getDeepCopy: false,
-        autoUnsubscribe: true
-    }
-    get defaultSubscribeFromElementOptions(): Readonly<SubscribeStateFromElementOptions> {
-        return this._defaultSubscribeStateFromElementOptions;
+    static getGlobalInstance(): LitElementStateService<any> {
+        return LitElementStateService._globalInstance;
     }
 
-    private stateSubscriptions: LitElementStateSubscription<any>[] = [];
+    config: StateConfig;
 
-    set(statePartial: DeepPartial<ReducableState<State>>, customReducer?: CustomStateReducer<State>): void {
-        if (customReducer) {
-            this._state = customReducer(
-                this._state,
-                statePartial
-            );
-        } else {
-            this.deepReduce(
-                this._state,
-                statePartial
-            );
-        }
+    set(statePartial: DeepPartial<ReducableState<State>>, cache?: CacheMode): void {
+        this.deepReduce(
+            this._state,
+            statePartial,
+            cache ? {
+                    path: this.config.cache.prefix ? [ this.config.cache.prefix ] : [],
+                    mode: cache
+                } : null
+        );
         for (const subscription of this.stateSubscriptions) {
             this.checkSubscriptionChange(subscription, statePartial);
         }
@@ -185,7 +187,7 @@ export class LitElementStateService<State> {
         let partial = object;
         for (const [index, segment] of segments.entries()) {
             if (!isObject(partial)) {
-                throw new Error(`Error from lit-state: Subscribed path ${ segments.join('.') } doesn't exist!`)
+                throw new Error(`Error from lit-state: Subscribed path ${segments.join('.')} doesn't exist!`)
             }
             if (segment in partial) {
                 partial = partial[segment];
@@ -203,32 +205,43 @@ export class LitElementStateService<State> {
         return partial as DeepPartial<State>;
     }
 
-    private deepReduce(target: State, source: ReducableState<State> | DeepPartial<ReducableState<State>>) {
+    private deepReduce(target: State, source: ReducableState<State> | DeepPartial<ReducableState<State>>, cache?: { path: string[], mode: CacheMode }) {
+        let cacheHandler: CacheHandler;
+        if (cache) {
+            if (cache.mode === 'localStorage') {
+                cacheHandler = new LocalStorageCacheHandler();
+            }
+        }
         for (const key in source) {
+            if (cache) {
+                cache.path.push(key);
+            }
             if (isObject(source[key]) && !(isExceptionFromDeepReduce(source[key])) &&
                 (!('_reducerMode' in source[key]) || source[key]._reducerMode === 'merge')) {
                 delete source[key]._reducerMode;
                 if (!target[key]) {
                     Object.assign(
                         target,
-                        { [key]: {} }
+                        {[key]: {}}
                     );
                 }
                 this.deepReduce(
                     target[key],
-                    source[key]
+                    source[key],
+                    cache
                 );
             } else {
-                if (source[key] === undefined) {
-                    target[key] = undefined;
-                }
-                else if (source[key] === null) {
-                    target[key] = null;
+                if (source[key] === undefined || source[key] === null) {
+                    target[key] = source[key];
+                    if (cache) {
+                        cacheHandler.unset(cache.path);
+                    }
                 } else {
                     delete source[key]._reducerMode;
+                    cacheHandler.set(cache.path, source[key]);
                     Object.assign(
                         target,
-                        { [key]: source[key] }
+                        {[key]: source[key]}
                     );
                 }
             }
