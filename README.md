@@ -1,20 +1,14 @@
 # lit-state
 A lightweight reactive state management for Lit 2
 
-This package contains no Javascript. You have to compile to JS first. If you use webpack's ts-loader you can just enable  "allowTsInNodeModules":
+<h1>Installation</h1>
 
 ```
-{
-    test: /\.ts$/,
-    use: {
-        loader: 'ts-loader',
-        options: {
-            allowTsInNodeModules: true
-        }
-}
+npm install @stefanholzapfel/lit-state
 ```
 
-# Initiate
+<h1>Initiate</h1>
+
 Create an interface that represents your state, e.g.:
 ```
 interface State {
@@ -144,9 +138,10 @@ Now just use the e.g. ```@internalProperty() mobile``` in your element as you wo
 
 When I find some time I plan to create a lit-element 3 controller for that features.
 
-# Manipulate state
+<h1> Manipulate state </h1>
 
-## 1. Directly
+<h2> 1. Directly </h2>
+
 Again, use the reference kept from instantiation.
 
 To set new values in the state, just provide the new partial you want to replace, e.g.:
@@ -222,6 +217,6 @@ stateService.set({
 I'm currently working on array handling, but for now array entries cannot be subscribed or manipulated individually.
 Arrays are for now always treated as primitives.
 
-## 2. In lit-element
+<h2> 2. In lit-element </h2>
 
 Same as using directly, just use the method ```this.setState()``` instead.
