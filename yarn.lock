@@ -20,12 +20,6 @@ lit-element@^3.0.0-rc.1:
     "@lit/reactive-element" "^1.0.0-rc.1"
     lit-html "^2.0.0-rc.1"
 
-"lit-helpers@https://github.com/stefanholzapfel/lit-helpers.git#2.0.0":
-  version "2.0.0"
-  resolved "https://github.com/stefanholzapfel/lit-helpers.git#3b65b9dda8b7438f4e9db6bc9c389341a5fd73bc"
-  dependencies:
-    lit "^2.0.0-rc.1"
-
 lit-html@^2.0.0-rc.1:
   version "2.0.0-rc.2"
   resolved "https://registry.yarnpkg.com/lit-html/-/lit-html-2.0.0-rc.2.tgz#c7ac652af1df7e5d8e32a3e6130221766d09cbde"
@@ -46,3 +40,8 @@ ts-essentials@^7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-7.0.1.tgz#d205508cae0cdadfb73c89503140cf2228389e2d"
   integrity sha512-8lwh3QJtIc1UWhkQtr9XuksXu3O0YQdEE5g79guDfhCaU1FWTDIEDZ1ZSx4HTHUmlJZ8L812j3BZQ4a0aOUkSA==
+
+typescript@^4.2.4:
+  version "4.2.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.2.4.tgz#8610b59747de028fda898a8aef0e103f156d0961"
+  integrity sha512-V+evlYHZnQkaz8TRBuxTA92yZBPotr5H+WhQ7bD3hZUndx5tGOa1fuCgeSjxAzM1RiN5IzvadIXTVefuuwZCRg==

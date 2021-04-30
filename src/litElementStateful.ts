@@ -1,4 +1,5 @@
 import {DeepPartial} from 'ts-essentials';
+import { LitElement } from 'lit';
 import {
     StateSubscriptionFunction,
     ReducableState,
@@ -7,9 +8,8 @@ import {
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
 import {optionsFromDefaultOrParams} from './litElementState.helpers';
-import {LitElementEnhanced} from '../lit-helpers';
 
-export class LitElementStateful<State> extends LitElementEnhanced {
+export class LitElementStateful<State> extends LitElement {
 
     private autoUnsubscribeSubs: LitElementStateSubscription<any>[] = [];
     private stateService: LitElementStateService<State>;

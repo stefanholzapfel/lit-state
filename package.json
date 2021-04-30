@@ -1,17 +1,30 @@
 {
-  "name": "lit-state",
-  "version": "3.0.1",
+  "name": "@stefanholzapfel/lit-state",
+  "version": "3.0.2",
   "description": "A reactive state management for Lit 2",
   "repository": {
     "type": "git",
     "url": "https://github.com/stefanholzapfel/lit-state.git"
   },
-  "browser": "index.ts",
-  "scripts": {},
+  "scripts": {
+    "build": "tsc --build --clean && tsc",
+    "publish_npm": "tsc --build --clean && tsc && yarn publish"
+  },
   "author": "Stefan Holzapfel",
   "license": "MIT",
   "dependencies": {
-    "lit-helpers": "https://github.com/stefanholzapfel/lit-helpers.git#2.0.0",
+    "lit": "^2.0.0-rc.1",
     "ts-essentials": "^7.0.1"
-  }
+  },
+  "devDependencies": {
+    "typescript": "^4.2.4"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "main:": "dist/index.js",
+  "module": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ]
 }
