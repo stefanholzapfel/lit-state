@@ -1,5 +1,5 @@
 # lit-state
-A reactive state management for LitElement
+A lightweight reactive state management for Lit 2
 
 This package contains no Javascript. You have to compile to JS first. If you use webpack's ts-loader you can just enable  "allowTsInNodeModules":
 
@@ -50,7 +50,7 @@ export interface Author {
 ```
 You can nest the state as deep as you want.
 
-Somewhere in your app (before using the state of course), instantiate a LitElementStateService via:
+Somewhere in your app (before using the state), instantiate a LitElementStateService via:
 ```
 new LitElementStateService<State>({
                 app: {
@@ -80,7 +80,7 @@ The second param overwrites the default options for all subscriptions to the sta
 There are two ways to consume the state:
 
 ## 1. Directly
-Just use the state via a reference:
+Use the state via a reference:
 ```
 litService.state() // Returns the whole State object
 
@@ -92,7 +92,7 @@ const subscription = litService.subscribe('app', 'offline', value => {
 
 When subscribing to LitElementStateService, provide the path to the "partial" of the state to observe.
 One string param per nested property. The depth of the "subscription path" for now is limited to six, since I wanted 
-auto completion (yes you get auto-completion!) and didn't find another way in typescript than overriding the function 
+auto-completion (yes you get auto-completion!) and didn't find another way in typescript than overriding the function 
 multiple times.
 
 As third param you could again override the default subscription params (see chapter "Initiate").

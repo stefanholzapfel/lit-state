@@ -1,7 +1,7 @@
 {
   "name": "lit-state",
-  "version": "3.0.0",
-  "description": "A reactive state management for LitElement",
+  "version": "3.0.1",
+  "description": "A reactive state management for Lit 2",
   "repository": {
     "type": "git",
     "url": "https://github.com/stefanholzapfel/lit-state.git"
