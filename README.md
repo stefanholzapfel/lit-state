@@ -225,6 +225,3 @@ Arrays are for now always treated as primitives.
 ## 2. In lit-element
 
 Same as using directly, just use the method ```this.setState()``` instead.
-
-I will publish a second library that helps managing network operations like fetching with this state library. 
-It's currently in testing.
