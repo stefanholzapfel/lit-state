@@ -2,6 +2,9 @@
   "name": "@stefanholzapfel/lit-state",
   "version": "3.0.2",
   "description": "A reactive state management for Lit 2",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/stefanholzapfel/lit-state.git"
