@@ -11,7 +11,7 @@ import {optionsFromDefaultOrParams} from './litElementState.helpers';
 
 export class LitElementStateful<State> extends LitElement {
 
-    private autoUnsubscribeSubs: LitElementStateSubscription<any>[] = [];
+    private autoUnsubscribeCache: Map<LitElementStateSubscription<any>, any> = new Map();
     private stateService: LitElementStateService<State>;
 
     constructor(stateService?: LitElementStateService<State>) {
@@ -70,9 +70,9 @@ export class LitElementStateful<State> extends LitElement {
     subscribeState<Part>(
         ...params: (string | StateSubscriptionFunction<Part> | SubscribeStateFromElementOptions)[]
     ): LitElementStateSubscription<Part> | void {
-        const subscription = this.stateService.subscribe.apply(this.stateService, params) as LitElementStateSubscription<Part>;
+        const subscription = this.stateService.subscribe.apply(this.stateService, params);
         if ((subscription.subscriptionOptions as SubscribeStateFromElementOptions).autoUnsubscribe) {
-            this.autoUnsubscribeSubs.push(subscription);
+            this.autoUnsubscribeCache.set(subscription, params);
         }
         return subscription;
     }
@@ -162,13 +162,22 @@ export class LitElementStateful<State> extends LitElement {
         params.push(options);
         const subscription = this.stateService.subscribe.apply(this.stateService, params);
         if (options.autoUnsubscribe) {
-            this.autoUnsubscribeSubs.push(subscription);
+            this.autoUnsubscribeCache.set(subscription, params);
         }
         return subscription;
     }
 
+    connectedCallback(): void {
+        super.connectedCallback();
+        this.autoUnsubscribeCache.forEach((params, subscription) => {
+            const newSubscription = this.stateService.subscribe.apply(this.stateService, params);
+            this.autoUnsubscribeCache.set(params, newSubscription);
+            this.autoUnsubscribeCache.delete(subscription);
+        });
+    }
+
     disconnectedCallback(): void {
         super.disconnectedCallback();
-        this.autoUnsubscribeSubs.forEach(subscription => subscription.unsubscribe())
+        this.autoUnsubscribeCache.forEach((params, subscription) => subscription.unsubscribe());
     }
 }
