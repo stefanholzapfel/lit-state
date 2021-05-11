@@ -45,6 +45,6 @@ export class LitElementStateSubscription<SubscribedType> {
     
     unsubscribe() {
         this.unsubscribeFunction(this);
-        closed = true;
+        this.closed = true;
     }
 }
