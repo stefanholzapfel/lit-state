@@ -220,3 +220,54 @@ Arrays are for now always treated as primitives.
 <h2> 2. In lit-element </h2>
 
 Same as using directly, just use the method ```this.setState()``` instead.
+
+<h1>(WIP) Persist state</h1>
+
+To persist state and reload it on service instantiation, provide an array of cache handlers in the state option's ```cache``` property.
+
+Optionally you can also provide a name to enable the cache handler to use different persistent caches for different state services.
+
+Example:
+```
+new LitElementStateService<State>({
+                exampleState: {
+                    offline: false,
+                    mobile: false
+                }
+            },
+            {
+                global: true,
+                cache: {
+                    name: 'myState1',
+                    handlers: [
+                        new LocalStorageCacheHandler()
+                    ]
+                }
+            }));
+```
+
+The LocalStorageCacheHandler is provided with this package (others may follow). You can implement your own following the
+```CachHandler``` interface.
+
+If you provide multiple handlers, they will load their initial state in the order you provide them (and therefore may overwrite each other).
+
+To persist a state change provide the name of the cache handler to use:
+
+```
+stateService.set(
+    { exampleState: { offline: true } },
+    'localstorage'
+)
+```
+or in LitElementStateful:
+```
+this.setState(
+    { exampleState: { offline: true } },
+    'localstorage'
+)
+```
+
+The handler name is the ```name``` property of the cache handler. 
+
+The cache handler has to be provided when instantiating the service,
+otherwise you will get an error.
