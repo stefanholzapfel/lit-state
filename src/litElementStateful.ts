@@ -10,7 +10,6 @@ import {LitElementStateSubscription} from './litElementStateSubscription';
 import {optionsFromDefaultOrParams} from './litElementState.helpers';
 
 export class LitElementStateful<State> extends LitElement {
-
     private autoUnsubscribeCache: Map<LitElementStateSubscription<any>, any> = new Map();
     private stateService: LitElementStateService<State>;
 
@@ -170,9 +169,11 @@ export class LitElementStateful<State> extends LitElement {
     connectedCallback(): void {
         super.connectedCallback();
         this.autoUnsubscribeCache.forEach((params, subscription) => {
-            const newSubscription = this.stateService.subscribe.apply(this.stateService, params);
-            this.autoUnsubscribeCache.set(params, newSubscription);
-            this.autoUnsubscribeCache.delete(subscription);
+            if (subscription.closed) {
+                const newSubscription = this.stateService.subscribe.apply(this.stateService, params);
+                this.autoUnsubscribeCache.set(newSubscription, params);
+                this.autoUnsubscribeCache.delete(subscription);
+            }
         });
     }
 

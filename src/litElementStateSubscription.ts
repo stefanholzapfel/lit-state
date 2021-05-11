@@ -5,6 +5,7 @@ export class LitElementStateSubscription<SubscribedType> {
     previousValue: SubscribedType = null;
     value: SubscribedType = null;
     path: string[];
+    closed = false;
     
     private subscriptionFunction;
     private unsubscribeFunction: (subscription: LitElementStateSubscription<SubscribedType>) => void;
@@ -44,5 +45,6 @@ export class LitElementStateSubscription<SubscribedType> {
     
     unsubscribe() {
         this.unsubscribeFunction(this);
+        closed = true;
     }
 }
