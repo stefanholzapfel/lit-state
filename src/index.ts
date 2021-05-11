@@ -1,16 +1,19 @@
+import {LitElementStateService} from './litElementState.service';
+
 export interface StateConfig {
     cache?: {
-        prefix?: string;
-        load?: CacheMode[];
+        name?: string;
+        handlers: CacheHandler[];
     };
     defaultSubscribeOptions?: SubscribeStateFromElementOptions;
     global: boolean;
 }
 
 export interface CacheHandler {
-    set(path: string[], value: any);
-    unset(path: string[]);
-    load(path: string[]): any;
+    name: string;
+    set(path: string[], value: any, stateServiceInstance: LitElementStateService<any>);
+    unset(path: string[], stateServiceInstance: LitElementStateService<any>);
+    load(stateServiceInstance: LitElementStateService<any>): any;
 }
 
 export type StateSubscriptionFunction<P> = (
@@ -23,7 +26,6 @@ export interface StateChange<P> {
 }
 
 export type StateReducerMode = 'merge' | 'replace';
-export type CacheMode = 'localStorage';
 
 export interface SubscribeStateOptions {
     getInitialValue?: boolean;

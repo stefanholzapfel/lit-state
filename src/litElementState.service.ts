@@ -1,7 +1,6 @@
 import {DeepPartial} from 'ts-essentials';
 import {
     CacheHandler,
-    CacheMode,
     ReducableState,
     StateConfig,
     StateSubscriptionFunction,
@@ -9,12 +8,11 @@ import {
 } from './index';
 import {LitElementStateSubscription} from './litElementStateSubscription';
 import {isExceptionFromDeepReduce, isObject, optionsFromDefaultOrParams} from './litElementState.helpers';
-import {LocalStorageCacheHandler} from './cache.handler';
 
 export class LitElementStateService<State> {
     private static _globalInstance;
     private stateSubscriptions: LitElementStateSubscription<any>[] = [];
-
+    private cacheHandlers: Map<string, CacheHandler> = new Map();
     constructor(
         initialState?: State,
         config?: StateConfig
@@ -28,13 +26,14 @@ export class LitElementStateService<State> {
                 autoUnsubscribe: true,
                 ...config?.defaultSubscribeOptions
             },
-            ...config?.cache && {
-                cache: {
-                    prefix: config.cache.prefix,
-                    load: config.cache.load ? config.cache.load : []
-                }
-            }
+            ...config?.cache
         }
+
+        this.config?.cache?.handlers.forEach(cacheHandler => {
+            this.cacheHandlers.set(cacheHandler.name, cacheHandler);
+            // TODO: deep merge?
+            initialState = { ...initialState, ...cacheHandler.load(this) };
+        })
 
         if (this.config.global) {
             LitElementStateService._globalInstance = this;
@@ -55,18 +54,19 @@ export class LitElementStateService<State> {
 
     config: StateConfig;
 
-    set(statePartial: DeepPartial<ReducableState<State>>, cache?: CacheMode): void {
-        let cacheHandler: CacheHandler;
-        if (cache) {
-            if (cache === 'localStorage') {
-                cacheHandler = new LocalStorageCacheHandler();
+    set(statePartial: DeepPartial<ReducableState<State>>, cacheHandlerName?: string): void {
+        let cacheHandler;
+        if (cacheHandlerName) {
+            cacheHandler = this.cacheHandlers.get(cacheHandlerName);
+            if (!cacheHandler) {
+                console.error(`lit-state: A cache handler with name ${ cacheHandlerName } was not registered! This set call will not be persisted!`)
             }
         }
         this.deepReduce(
             this._state,
             statePartial,
-            cache ? {
-                    path: this.config.cache.prefix ? [ this.config.cache.prefix ] : [],
+            cacheHandler ? {
+                    path: [],
                     handler: cacheHandler
                 } : null
         );
@@ -233,10 +233,10 @@ export class LitElementStateService<State> {
             } else {
                 if (source[key] === undefined || source[key] === null) {
                     target[key] = source[key];
-                    cache?.handler.unset(cache.path);
+                    cache?.handler.unset(cache.path, this);
                 } else {
                     delete source[key]._reducerMode;
-                    cache?.handler.set(cache.path, source[key]);
+                    cache?.handler.set(cache.path, source[key], this);
                     Object.assign(
                         target,
                         {[key]: source[key]}

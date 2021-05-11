@@ -3,7 +3,7 @@ import { LitElement } from 'lit';
 import {
     StateSubscriptionFunction,
     ReducableState,
-    SubscribeStateFromElementOptions, CacheMode
+    SubscribeStateFromElementOptions
 } from './index';
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
@@ -29,8 +29,8 @@ export class LitElementStateful<State> extends LitElement {
         return this.stateService.state;
     };
 
-    setState(statePartial: DeepPartial<ReducableState<State>>, cache?: CacheMode) {
-        this.stateService.set(statePartial, cache);
+    setState(statePartial: DeepPartial<ReducableState<State>>, cacheHandlerName?: string) {
+        this.stateService.set(statePartial, cacheHandlerName);
     }
 
     // Overloads
