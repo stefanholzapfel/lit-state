@@ -240,7 +240,7 @@ new LitElementStateService<State>({
                 cache: {
                     name: 'myState1',
                     handlers: [
-                        new LocalStorageCacheHandler()
+                        new LocalStorageCacheHandler<State>()
                     ]
                 }
             }));
