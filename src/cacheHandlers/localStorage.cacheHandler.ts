@@ -35,11 +35,12 @@ class LocalStorageCacheHandler implements CacheHandler {
     }
 
     set(path: string[], value: any, stateServiceInstance: LitElementStateService<any>) {
+        const _path = [...path];
         if (typeof value === 'object') {
             // When an object is set, it replaces all other values under this path
-            this.unset(path, stateServiceInstance);
+            this.unset(_path, stateServiceInstance);
         }
-        this.deepSet(this.getPathString(path, stateServiceInstance), value);
+        this.deepSet(this.getPathString(_path, stateServiceInstance), value);
     }
 
     unset(path: string[], stateServiceInstance: LitElementStateService<any>) {
