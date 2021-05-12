@@ -68,6 +68,7 @@ export const optionsFromDefaultOrParams = (params: any[], service: LitElementSta
     return options;
 }
 
+// Checks if an object shouldn't be deep reduced but rather replaced. These types are also excluded from caching
 export const isExceptionFromDeepReduce: (obj: any) => boolean = (obj) => {
     return (
         obj instanceof Promise ||

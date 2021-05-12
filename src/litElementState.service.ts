@@ -12,10 +12,10 @@ import {isExceptionFromDeepReduce, isObject, optionsFromDefaultOrParams} from '.
 export class LitElementStateService<State> {
     private static _globalInstance;
     private stateSubscriptions: LitElementStateSubscription<any>[] = [];
-    private cacheHandlers: Map<string, CacheHandler> = new Map();
+    private cacheHandlers: Map<string, CacheHandler<State>> = new Map();
     constructor(
         initialState?: State,
-        config?: StateConfig
+        config?: StateConfig<State>
     ) {
         this.config = {
             global: !!config?.global,
@@ -51,23 +51,20 @@ export class LitElementStateService<State> {
         return LitElementStateService._globalInstance;
     }
 
-    config: StateConfig;
+    config: StateConfig<State>;
 
     set(statePartial: DeepPartial<ReducableState<State>>, cacheHandlerName?: string): void {
-        let cacheHandler;
         if (cacheHandlerName) {
-            cacheHandler = this.cacheHandlers.get(cacheHandlerName);
+            const cacheHandler = this.cacheHandlers.get(cacheHandlerName);
             if (!cacheHandler) {
                 console.error(`lit-state: A cache handler with name ${ cacheHandlerName } was not registered! This set call will not be persisted!`)
+            } else {
+                cacheHandler.set(statePartial, this);
             }
         }
         this.deepReduce(
             this._state,
-            statePartial,
-            cacheHandler ? {
-                    path: [],
-                    handler: cacheHandler
-                } : null
+            statePartial
         );
         for (const subscription of this.stateSubscriptions) {
             this.checkSubscriptionChange(subscription, statePartial);
@@ -212,9 +209,8 @@ export class LitElementStateService<State> {
         return partial as DeepPartial<State>;
     }
 
-    private deepReduce(state: State, change: ReducableState<State> | DeepPartial<ReducableState<State>>, cache?: { path: string[], handler: CacheHandler }) {
+    private deepReduce(state: State, change: ReducableState<State> | DeepPartial<ReducableState<State>>) {
         for (const key in change) {
-            cache?.path.push(key);
             if (isObject(change[key]) && !(isExceptionFromDeepReduce(change[key])) &&
                 (!('_reducerMode' in change[key]) || change[key]._reducerMode === 'merge')) {
                 delete change[key]._reducerMode;
@@ -226,26 +222,20 @@ export class LitElementStateService<State> {
                 }
                 this.deepReduce(
                     state[key],
-                    change[key],
-                    cache
+                    change[key]
                 );
             } else {
                 if (change[key] === undefined || change[key] === null) {
                     state[key] = change[key];
-                    cache?.handler.unset(cache.path, this);
                 } else {
                     delete change[key]._reducerMode;
-                    cache?.handler.set(cache.path, change[key], this);
                     Object.assign(
                         state,
                         {[key]: change[key]}
                     );
                 }
-                cache?.path.pop();
             }
         }
-        cache?.path.pop();
         return state;
     }
-
 }

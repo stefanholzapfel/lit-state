@@ -1,19 +1,19 @@
 import {LitElementStateService} from './litElementState.service';
+import {DeepPartial} from 'ts-essentials';
 
-export interface StateConfig {
+export interface StateConfig<State> {
     cache?: {
         name?: string;
-        handlers: CacheHandler[];
+        handlers: CacheHandler<State>[];
     };
     defaultSubscribeOptions?: SubscribeStateFromElementOptions;
     global: boolean;
 }
 
-export interface CacheHandler {
+export interface CacheHandler<State> {
     name: string;
-    set(path: string[], value: any, stateServiceInstance: LitElementStateService<any>);
-    unset(path: string[], stateServiceInstance: LitElementStateService<any>);
-    load(stateServiceInstance: LitElementStateService<any>): any;
+    set(change: ReducableState<State> | DeepPartial<ReducableState<State>>, stateServiceInstance: LitElementStateService<State>);
+    load(stateServiceInstance: LitElementStateService<State>): ReducableState<State> | DeepPartial<State>;
 }
 
 export type StateSubscriptionFunction<P> = (

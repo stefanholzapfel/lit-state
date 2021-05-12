@@ -1,75 +1,92 @@
-import {CacheHandler, LitElementStateService} from '../index';
+import {CacheHandler, LitElementStateService, ReducableState} from '../index';
 import {isExceptionFromDeepReduce, isObject} from '../litElementState.helpers';
+import {DeepPartial} from 'ts-essentials';
 
 const LOCALSTORAGE_PREFIX = 'lit-state';
 
-class LocalStorageCacheHandler implements CacheHandler {
+class LocalStorageCacheHandler<State> implements CacheHandler<State> {
     name = 'localstorage';
     private localStorageKeys = new Set<string>();
 
-    constructor() {
-        for (let localStorageKey of this.localStorageKeys.values()) {
-            if (localStorageKey.startsWith(this.getPathString([]))) {
-                this.localStorageKeys.add(localStorageKey);
-            }
-        }
-    }
-
-    load(stateServiceInstance: LitElementStateService<any>): any {
-        const res = {};
-        this.localStorageKeys.forEach(key => {
-            if (key.startsWith(this.getPathString([], stateServiceInstance))) {
+    load(stateServiceInstance: LitElementStateService<State>): ReducableState<State> | DeepPartial<State> {
+        const res = {} as DeepPartial<State>;
+        const fullPrefix = this.getFullPrefix(stateServiceInstance);
+        for (const key in localStorage) {
+            if (key.startsWith(fullPrefix)) {
+                this.localStorageKeys.add(key);
+                const path = key.substring(fullPrefix.length).split('.');
                 const entry = JSON.parse(localStorage.getItem(key));
                 switch (entry.t) {
                     case 'boolean':
-                        return entry.val === 'true';
+                        this.setValue(res, path, entry.v === 'true');
+                        break;
                     case 'number':
-                        return +entry.val;
+                        this.setValue(res, path, +entry.v);
+                        break;
                     case 'string':
                     case 'array':
-                        return entry.val;
+                        this.setValue(res, path, entry.v);
+                        break;
                 }
             }
-        });
+        }
         return res;
     }
 
-    set(path: string[], value: any, stateServiceInstance: LitElementStateService<any>) {
-        const _path = [...path];
-        if (typeof value === 'object') {
-            // When an object is set, it replaces all other values under this path
-            this.unset(_path, stateServiceInstance);
+    private setValue(object: DeepPartial<State>, path: string[], value: any) {
+        path.forEach((segment, index) => {
+            if (index === path.length - 1) {
+                object[segment] = value;
+            } else {
+                if (!object.hasOwnProperty(segment)) {
+                    object[segment] = {};
+                }
+                object = object[segment];
+            }
+        });
+    };
+
+    set(change: ReducableState<State> | DeepPartial<ReducableState<State>>, stateServiceInstance: LitElementStateService<State>) {
+        const path = [ LOCALSTORAGE_PREFIX ];
+        if (!!stateServiceInstance?.config?.cache?.name) {
+            path.push(stateServiceInstance.config.cache.name);
         }
-        this.deepSet(this.getPathString(_path, stateServiceInstance), value);
+        this.setRecursive(change, path);
     }
 
-    unset(path: string[], stateServiceInstance: LitElementStateService<any>) {
-        const pathString = this.getPathString(path, stateServiceInstance);
+    private setRecursive(change: ReducableState<State> | DeepPartial<ReducableState<State>>, path: string[]) {
+        for (const key in change) {
+            if (!isExceptionFromDeepReduce(change[key])) {
+                if (isObject(change[key]) && !Array.isArray(change[key])) {
+                    if ('_reducerMode' in change[key] && change[key]._reducerMode === 'replace') {
+                        this.unset([ ...path, key ]);
+                    }
+                    delete change[key]._reducerMode;
+                    this.setRecursive(change[key], [ ...path, key ]);
+                } else {
+                    if (change[key] === null || change[key] === undefined) {
+                        this.unset([ ...path, key ]);
+                    } else {
+                        localStorage.setItem([ ...path, key ].join('.'), JSON.stringify({ v: change[key], t: Array.isArray(change[key]) ? 'array' : typeof change[key] }));
+                    }
+                }
+            } else  {
+                this.unset([ ...path, key ]);
+            }
+        }
+    }
+
+    private unset(path: string[]) {
         for (let localStorageKey of this.localStorageKeys.values()) {
-            if (localStorageKey.startsWith(pathString)) {
+            if (localStorageKey.startsWith(path.join('.'))) {
                 localStorage.removeItem(localStorageKey);
                 this.localStorageKeys.delete(localStorageKey);
             }
         }
     }
 
-    private deepSet(path: string, value: any) {
-        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || Array.isArray(value)) {
-            this.localStorageKeys.add(path);
-            localStorage.setItem(path, JSON.stringify({ v: value, t: Array.isArray(value) ? 'array' : typeof value }));
-        } else if (isObject(value)) {
-            if (!isExceptionFromDeepReduce(value)) {
-                for (const key in value) {
-                    this.deepSet(`${path}.${key}`, value[key]);
-                }
-            }
-        }
-    }
-
-    private getPathString(path: string[], stateServiceInstance?: LitElementStateService<any>) {
-        if (stateServiceInstance?.config?.cache?.name) { path.unshift(stateServiceInstance.config?.cache?.name) }
-        path.unshift(LOCALSTORAGE_PREFIX);
-        return path.join('.');
+    private getFullPrefix(stateServiceInstance?: LitElementStateService<State>): string {
+        return `${LOCALSTORAGE_PREFIX}.${ stateServiceInstance.config?.cache?.name ? `${stateServiceInstance.config?.cache?.name}.` : '' }`;
     }
 }
 
