@@ -26,13 +26,12 @@ export class LitElementStateService<State> {
                 autoUnsubscribe: true,
                 ...config?.defaultSubscribeOptions
             },
-            ...config?.cache
+            ...config.cache && { cache: config.cache }
         }
 
         this.config?.cache?.handlers.forEach(cacheHandler => {
             this.cacheHandlers.set(cacheHandler.name, cacheHandler);
-            // TODO: deep merge?
-            initialState = { ...initialState, ...cacheHandler.load(this) };
+            initialState = this.deepReduce(initialState, cacheHandler.load(this));
         })
 
         if (this.config.global) {
@@ -213,40 +212,40 @@ export class LitElementStateService<State> {
         return partial as DeepPartial<State>;
     }
 
-    private deepReduce(target: State, source: ReducableState<State> | DeepPartial<ReducableState<State>>, cache?: { path: string[], handler: CacheHandler }) {
-        for (const key in source) {
+    private deepReduce(state: State, change: ReducableState<State> | DeepPartial<ReducableState<State>>, cache?: { path: string[], handler: CacheHandler }) {
+        for (const key in change) {
             cache?.path.push(key);
-            if (isObject(source[key]) && !(isExceptionFromDeepReduce(source[key])) &&
-                (!('_reducerMode' in source[key]) || source[key]._reducerMode === 'merge')) {
-                delete source[key]._reducerMode;
-                if (!target[key]) {
+            if (isObject(change[key]) && !(isExceptionFromDeepReduce(change[key])) &&
+                (!('_reducerMode' in change[key]) || change[key]._reducerMode === 'merge')) {
+                delete change[key]._reducerMode;
+                if (!state[key]) {
                     Object.assign(
-                        target,
+                        state,
                         {[key]: {}}
                     );
                 }
                 this.deepReduce(
-                    target[key],
-                    source[key],
+                    state[key],
+                    change[key],
                     cache
                 );
             } else {
-                if (source[key] === undefined || source[key] === null) {
-                    target[key] = source[key];
+                if (change[key] === undefined || change[key] === null) {
+                    state[key] = change[key];
                     cache?.handler.unset(cache.path, this);
                 } else {
-                    delete source[key]._reducerMode;
-                    cache?.handler.set(cache.path, source[key], this);
+                    delete change[key]._reducerMode;
+                    cache?.handler.set(cache.path, change[key], this);
                     Object.assign(
-                        target,
-                        {[key]: source[key]}
+                        state,
+                        {[key]: change[key]}
                     );
                 }
                 cache?.path.pop();
             }
         }
         cache?.path.pop();
-        return target;
+        return state;
     }
 
 }
