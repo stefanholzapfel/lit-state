@@ -27,6 +27,10 @@ export interface StateChange<P> {
 
 export type StateReducerMode = 'merge' | 'replace';
 
+export type PredicateFunction<ArrayType> = (array: ArrayType[]) => ArrayType;
+export type ArrayElement<ArrayType extends any> =
+    ArrayType extends (infer ElementType)[] ? ElementType : never;
+
 export interface SubscribeStateOptions {
     getInitialValue?: boolean;
     // Set true to trigger changes when a sub-property of a subscribed property changes
@@ -41,7 +45,8 @@ export interface SubscribeStateFromElementOptions extends SubscribeStateOptions 
 export type ReducableState<State> = {
     [P in keyof State]?: State[P] &
     {
-        _reducerMode?: StateReducerMode;
+        _predicate?: PredicateFunction<State[P]>,
+        _reducerMode?: StateReducerMode
     } | ReducableState<State[P]>
 };
 

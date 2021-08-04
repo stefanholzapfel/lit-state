@@ -1,6 +1,7 @@
 import {DeepPartial} from 'ts-essentials';
 import {
-    CacheHandler,
+    ArrayElement,
+    CacheHandler, PredicateFunction,
     ReducableState,
     StateConfig,
     StateSubscriptionFunction,
@@ -73,23 +74,23 @@ export class LitElementStateService<State> {
 
     // Overloads
     subscribe<K1 extends keyof State>(
-        k1: K1 | ((array: State[K1]) => boolean),
+        k1: K1,
         subscriptionFunction: StateSubscriptionFunction<State[K1]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1]>;
     subscribe<K1 extends keyof State,
         K2 extends keyof State[K1]>(
-        k1: K1 | ((array: State[K1]) => boolean),
-        k2: K2 | ((array: State[K1][K2]) => boolean),
+        k1: K1,
+        k2: State[K1] extends Array<ArrayElement<State[K1]>> ? PredicateFunction<ArrayElement<State[K1]>> | number : K2,
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2]>;
     subscribe<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2]>(
-        k1: K1 | ((array: State[K1]) => boolean),
-        k2: K2 | ((array: State[K1][K2]) => boolean),
-        k3: K3 | ((array: State[K1][K2][K3]) => boolean),
+        k1: K1,
+        k2: State[K1] extends Array<ArrayElement<State[K1]>> ? PredicateFunction<ArrayElement<State[K1]>> | number : K2,
+        k3: State[K1][K2] extends Array<ArrayElement<State[K1][K2]>> ? PredicateFunction<ArrayElement<State[K1][K2]>> | number : K3,
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3]>;
@@ -97,23 +98,24 @@ export class LitElementStateService<State> {
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2],
         K4 extends keyof State[K1][K2][K3]>(
-        k1: K1 | ((array: State[K1]) => boolean),
-        k2: K2 | ((array: State[K1][K2]) => boolean),
-        k3: K3 | ((array: State[K1][K2][K3]) => boolean),
-        k4: K4 | ((array: State[K1][K2][K3][K4]) => boolean),
+        k1: K1,
+        k2: State[K1] extends Array<ArrayElement<State[K1]>> ? PredicateFunction<ArrayElement<State[K1]>> | number : K2,
+        k3: State[K1][K2] extends Array<ArrayElement<State[K1][K2]>> ? PredicateFunction<ArrayElement<State[K1][K2]>> | number : K3,
+        k4: State[K1][K2][K3] extends Array<ArrayElement<State[K1][K2][K3]>> ? PredicateFunction<ArrayElement<State[K1][K2][K3]>> | number : K4,
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3][K4]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4]>;
+    // TODO: FIX TYPING (SEE LIT-STARTER ERROR)
     subscribe<K1 extends keyof State,
         K2 extends keyof State[K1],
         K3 extends keyof State[K1][K2],
         K4 extends keyof State[K1][K2][K3],
         K5 extends keyof State[K1][K2][K3][K4]>(
-        k1: K1 | ((array: State[K1]) => boolean),
-        k2: K2 | ((array: State[K1][K2]) => boolean),
-        k3: K3 | ((array: State[K1][K2][K3]) => boolean),
-        k4: K4 | ((array: State[K1][K2][K3][K4]) => boolean),
-        k5: K5 | ((array: State[K1][K2][K3][K4][K5]) => boolean),
+        k1: K1,
+        k2: State[K1] extends Array<ArrayElement<State[K1]>> ? PredicateFunction<ArrayElement<State[K1]>> | number : K2,
+        k3: State[K1][K2] extends Array<ArrayElement<State[K1][K2]>> ? PredicateFunction<ArrayElement<State[K1][K2]>> | number : K3,
+        k4: State[K1][K2][K3] extends Array<ArrayElement<State[K1][K2][K3]>> ? PredicateFunction<ArrayElement<State[K1][K2][K3]>> | number : K4,
+        k5: State[K1][K2][K3][K4] extends Array<ArrayElement<State[K1][K2][K3][K4]>> ? PredicateFunction<ArrayElement<State[K1][K2][K3][K4]>> | number : K5,
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3][K4][K5]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4][K5]>;
@@ -123,18 +125,18 @@ export class LitElementStateService<State> {
         K4 extends keyof State[K1][K2][K3],
         K5 extends keyof State[K1][K2][K3][K4],
         K6 extends keyof State[K1][K2][K3][K4][K5]>(
-        k1: K1 | ((array: State[K1]) => boolean),
-        k2: K2 | ((array: State[K1][K2]) => boolean),
-        k3: K3 | ((array: State[K1][K2][K3]) => boolean),
-        k4: K4 | ((array: State[K1][K2][K3][K4]) => boolean),
-        k5: K5 | ((array: State[K1][K2][K3][K4][K5]) => boolean),
-        k6: K6 | ((array: State[K1][K2][K3][K4][K5][K6]) => boolean),
+        k1: K1,
+        k2: State[K1] extends Array<ArrayElement<State[K1]>> ? PredicateFunction<ArrayElement<State[K1]>> | number : K2,
+        k3: State[K1][K2] extends Array<ArrayElement<State[K1][K2]>> ? PredicateFunction<ArrayElement<State[K1][K2]>> | number : K3,
+        k4: State[K1][K2][K3] extends Array<ArrayElement<State[K1][K2][K3]>> ? PredicateFunction<ArrayElement<State[K1][K2][K3]>> | number : K4,
+        k5: State[K1][K2][K3][K4] extends Array<ArrayElement<State[K1][K2][K3][K4]>> ? PredicateFunction<ArrayElement<State[K1][K2][K3][K4]>> | number : K5,
+        k6: State[K1][K2][K3][K4][K5] extends Array<ArrayElement<State[K1][K2][K3][K4][K5]>> ? PredicateFunction<ArrayElement<State[K1][K2][K3][K4][K5]>> | number : K6,
         subscriptionFunction: StateSubscriptionFunction<State[K1][K2][K3][K4][K5][K6]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1][K2][K3][K4][K5][K6]>;
     // Implementation
     subscribe<Part>(
-        ...params: (string | StateSubscriptionFunction<Part> | SubscribeStateOptions)[]
+        ...params: (string | number | PredicateFunction<any> | StateSubscriptionFunction<Part> | SubscribeStateOptions)[]
     ): LitElementStateSubscription<Part> {
         const options = optionsFromDefaultOrParams(params, this);
         const subscriptionFunction = params.pop() as StateSubscriptionFunction<Part>;
@@ -144,9 +146,7 @@ export class LitElementStateService<State> {
             this.unsubscribe.bind(this),
             options
         );
-        if (options.getInitialValue) {
-            this.checkSubscriptionChange(subscription, this._state, true);
-        }
+        this.checkSubscriptionChange(subscription, this._state, true);
         this.stateSubscriptions.push(subscription);
         return subscription;
     }
@@ -185,13 +185,21 @@ export class LitElementStateService<State> {
     }
 
     private getChangedPartial(
-        segments: string[],
+        segments: (string | number)[],
         object: State | DeepPartial<ReducableState<State>>
     ): DeepPartial<State> | 'path_not_touched' {
         let partial = object;
-        for (const [index, segment] of segments.entries()) {
-            if (!isObject(partial)) {
+        for (let [index, segment] of segments.entries()) {
+            if (typeof segment === 'string' && !isObject(partial)) {
                 throw new Error(`Error from lit-state: Subscribed path ${segments.join('.')} doesn't exist!`)
+            }
+            if ((typeof segment === 'number' || typeof segment === 'function') && !Array.isArray(partial)) {
+                throw new Error(`Error from lit-state: Subscribed a path with an array where no array exists!`)
+            }
+            if (typeof segment === 'function' && Array.isArray(partial)) {
+                const elem = (segment as PredicateFunction<State | DeepPartial<State>>)(partial);
+                if (elem) segment = partial.indexOf(elem);
+                else segment = -1;
             }
             if (segment in partial) {
                 partial = partial[segment];

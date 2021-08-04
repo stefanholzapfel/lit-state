@@ -29,7 +29,9 @@ export class LitElementStateSubscription<SubscribedType> {
         if (this.value !== value || this.subscriptionOptions.pushNestedChanges || initial) {
             this.previousValue = deepCopy(this.value);
             this.value = value;
-            this.emitValue();
+            if (!(initial && !this.subscriptionOptions.getInitialValue)) {
+                this.emitValue();
+            }
         }
     }
     
