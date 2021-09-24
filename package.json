@@ -1,6 +1,6 @@
 {
   "name": "@stefanholzapfel/lit-state",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "description": "A reactive state management for Lit 2",
   "publishConfig": {
     "access": "public"
@@ -11,16 +11,16 @@
   },
   "scripts": {
     "build": "tsc --build --clean && tsc",
-    "publish_npm": "tsc --build --clean && tsc && yarn publish"
+    "publish_npm": "tsc -b --clean && tsc && yarn publish"
   },
   "author": "Stefan Holzapfel",
   "license": "MIT",
   "dependencies": {
-    "lit": "^2.0.0-rc.2",
-    "ts-essentials": "^7.0.3"
+    "lit": "^2.0.0",
+    "ts-essentials": "^8.1.0"
   },
   "devDependencies": {
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.3"
   },
   "type": "module",
   "types": "dist/index.d.ts",

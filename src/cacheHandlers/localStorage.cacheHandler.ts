@@ -55,7 +55,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
     }
 
     private setRecursive(change: ReducableState<State> | DeepPartial<ReducableState<State>>, path: string[]) {
-        for (const key in change) {
+        for (const key in change as any) {
             if (!isExceptionFromDeepReduce(change[key])) {
                 if (isObject(change[key]) && !Array.isArray(change[key])) {
                     if ('_reducerMode' in change[key] && change[key]._reducerMode === 'replace') {

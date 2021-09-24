@@ -218,7 +218,7 @@ export class LitElementStateService<State> {
     }
 
     private deepReduce(state: State, change: ReducableState<State> | DeepPartial<ReducableState<State>>) {
-        for (const key in change) {
+        for (const key in change as any) {
             if (isObject(change[key]) && !(isExceptionFromDeepReduce(change[key])) &&
                 (!('_reducerMode' in change[key]) || change[key]._reducerMode === 'merge')) {
                 delete change[key]._reducerMode;
