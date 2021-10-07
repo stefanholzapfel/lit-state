@@ -1,4 +1,4 @@
-import { LitElementStateService, SubscribeStateFromElementOptions } from './index';
+import {LitElementStateService, StateChange, SubscribeStateFromElementOptions} from './index';
 
 export const isObject = (item) =>  {
     return (item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Map) && !(item instanceof Set));

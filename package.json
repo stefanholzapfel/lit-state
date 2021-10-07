@@ -10,7 +10,7 @@
     "url": "https://github.com/stefanholzapfel/lit-state.git"
   },
   "scripts": {
-    "build": "tsc --build --clean && tsc",
+    "build": "tsc -b --clean && tsc",
     "publish_npm": "tsc -b --clean && tsc && yarn publish"
   },
   "author": "Stefan Holzapfel",

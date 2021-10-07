@@ -12,24 +12,25 @@ export interface StateConfig<State> {
 
 export interface CacheHandler<State> {
     name: string;
-    set(change: ReducableState<State> | DeepPartial<ReducableState<State>>, stateServiceInstance: LitElementStateService<State>);
-    load(stateServiceInstance: LitElementStateService<State>): ReducableState<State> | DeepPartial<State>;
+
+    set(change: StateChange<State> | DeepPartial<StateChange<State>>, stateServiceInstance: LitElementStateService<State>);
+
+    load(stateServiceInstance: LitElementStateService<State>): StateChange<State> | DeepPartial<StateChange<State>>;
 }
 
 export type StateSubscriptionFunction<P> = (
-    value: StateChange<P>
+    value: Change<P>
 ) => void;
 
-export interface StateChange<P> {
+export interface Change<P> {
     readonly previous: P | null
     readonly current: P | null
 }
 
 export type StateReducerMode = 'merge' | 'replace';
 
-export type PredicateFunction<ArrayType> = (array: ArrayType[]) => ArrayType;
-export type ArrayElement<ArrayType extends any> =
-    ArrayType extends (infer ElementType)[] ? ElementType : never;
+export type PredicateFunction<ArrayType> = (array: ArrayType, index?: number) => boolean;
+export type ArraySubscriptionPredicate<ArrayName, ElementType> = { array: ArrayName, predicate: PredicateFunction<ElementType> };
 
 export interface SubscribeStateOptions {
     getInitialValue?: boolean;
@@ -42,13 +43,20 @@ export interface SubscribeStateFromElementOptions extends SubscribeStateOptions 
     autoUnsubscribe?: boolean;
 }
 
-export type ReducableState<State> = {
-    [P in keyof State]?: State[P] &
-    {
-        _predicate?: PredicateFunction<State[P]>,
-        _reducerMode?: StateReducerMode
-    } | ReducableState<State[P]>
-};
+export type StateChange<State> =
+    State extends Array<any> ?
+        {
+            _arrayOperation: { op: 'update', val: State[number] | StateChange<State[number]> , at: PredicateFunction<State[number]> | number }
+        } |
+        { _arrayOperation: { op: 'push', val: State[number], at?: number } } |
+        { _arrayOperation: { op: 'pull', at?: PredicateFunction<State[number]> | number } } |
+        State :
+            State extends Object ?
+                { _reducerMode?: StateReducerMode } &
+                {
+                    [P in keyof State]?:
+                        StateChange<State[P]>
+                } : State;
 
 export * from './litElementStateful';
 export * from './litElementState.service';

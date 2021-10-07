@@ -1,10 +1,15 @@
-import {StateSubscriptionFunction, SubscribeStateFromElementOptions, SubscribeStateOptions} from './index';
+import {
+    ArraySubscriptionPredicate,
+    StateSubscriptionFunction,
+    SubscribeStateFromElementOptions,
+    SubscribeStateOptions
+} from './index';
 import {deepCopy} from './litElementState.helpers';
 
 export class LitElementStateSubscription<SubscribedType> {
     previousValue: SubscribedType = null;
     value: SubscribedType = null;
-    path: string[];
+    path: (string | ArraySubscriptionPredicate<string, any>)[];
     closed = false;
     
     private subscriptionFunction;
@@ -12,7 +17,7 @@ export class LitElementStateSubscription<SubscribedType> {
     subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
     
     constructor(
-        path: string[],
+        path: (string | ArraySubscriptionPredicate<string, any>)[],
         subscriptionFunction: StateSubscriptionFunction<SubscribedType>,
         unsubscriptionFunction: (
             subscription: LitElementStateSubscription<any>
@@ -30,21 +35,17 @@ export class LitElementStateSubscription<SubscribedType> {
             this.previousValue = deepCopy(this.value);
             this.value = value;
             if (!(initial && !this.subscriptionOptions.getInitialValue)) {
-                this.emitValue();
+                this.subscriptionFunction(
+                    {
+                        previous: this.previousValue,
+                        current: this.subscriptionOptions.getDeepCopy ?
+                            deepCopy(this.value) : this.value
+                    }
+                );
             }
         }
     }
-    
-    emitValue() {
-        this.subscriptionFunction(
-            {
-                previous: this.previousValue,
-                current: this.subscriptionOptions.getDeepCopy ?
-                    deepCopy(this.value) : this.value
-            }
-        );
-    }
-    
+
     unsubscribe() {
         this.unsubscribeFunction(this);
         this.closed = true;
