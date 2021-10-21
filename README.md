@@ -46,18 +46,22 @@ You can nest the state as deep as you want.
 
 Somewhere in your app (before using the state), instantiate a LitElementStateService via:
 ```
-new LitElementStateService<State>({
-                app: {
-                    offline: false,
-                    mobile: false
-                }
-            },
-            {
-                global: true
-            }));
+new LitElementStateService<State>(
+    // Initial state
+    {
+        app: {
+            offline: false,
+            mobile: false
+        }
+    },
+    // Default options for subscriptions
+    {
+        global: true
+    }
+);
 ```
 You can either hold a reference to the newly created service or set the global flag in the state config to "true".
-With the global flag set, lit-state will hold a reference for you and use it as default service (more on that later).
+With the global flag set, lit-state will hold a reference for you and use it as default service when you provide none.
 
 The second param overwrites the default options for all subscriptions to the state:
 ```
@@ -85,19 +89,18 @@ const subscription = litService.subscribe('app', 'offline', value => {
 ```
 
 When subscribing to LitElementStateService, provide the path to the "partial" of the state to observe.
-One string param per nested property. The depth of the "subscription path" for now is limited to six, since I wanted 
-auto-completion (yes you get auto-completion!) and didn't find another way in typescript than overriding the function 
-multiple times.
+One string param per nested property. The depth of the "subscription path" for now is limited to six, since I didn't find another way to type the mehtod than overriding the function 
+multiple times (suggestions for improvement very welcome!).
 
 As third param you could again override the default subscription params (see chapter "Initiate").
 
-Don't forget to unsubscribe, or you get memory leaks:
+Don't forget to unsubscribe when you dont wan't to listen for state changes anymore, or you get memory leaks:
 ```
 subscription.unsubscribe();
 ```
 
 ## 2. In lit-element
-lit-state comes with a class that extends LitElement. Create your lit-element like this:
+lit-state comes with a class that extends LitElement. You can create your lit-element like this:
 ```
 export class MyComponent extends LitElementStateful<State> {
     constructor() {
@@ -105,13 +108,13 @@ export class MyComponent extends LitElementStateful<State> {
     }
 }
 ```
-You can provide a reference to a LitElementStateService in the constructor.
+Then you can provide a reference to a LitElementStateService in the constructor.
 If you have created a global LitElementStateService, you don't have to provide any service
-since lit-state will automatically take that one.
+since lit-state will automatically take that one (but you still can if you like).
 
 ```
 export class MyComponent extends LitElementStateful<State> {
-    @internalProperty()
+    @state()
     private mobile;
     
     constructor() {
@@ -126,17 +129,16 @@ export class MyComponent extends LitElementStateful<State> {
 }
 ```
 
-Now there are two options: 
+As you see in the example above you now have two ways to subscribe the state: 
 
 ```this.subscribeState()``` works the same as when using litService.subscribe directly
 
 ```this.connectState()``` will automatically connect the state partial defined to the lit-element's 
-property in the last string parameter. The property to connect to must be a @property / @internalProperty in your lit-element.
-requestUpdate() will automatically be called on every change and un-subscription also happens automatically.
+property in the last string parameter. The property to connect to must be a @property / @state in your lit-element.
+requestUpdate() will automatically be called on every change and un-subscription also happens automatically when the component is disconnected.
 
-Now just use the e.g. ```@internalProperty() mobile``` in your element as you would normally do.
+Now just use the e.g. ```@state() mobile``` in your element as you would normally do.
 
-When I find some time I plan to create a lit-element 3 controller for that features.
 
 <h1> Manipulate state </h1>
 
@@ -194,7 +196,7 @@ stateService.set({
         mobile: false
     },
     books: {
-        _reducerMode: '_replace', // Replaces the property "books" with the given object
+        _reducerMode: 'replace', // Replaces the property "books" with the given object
         bookCount: 0; 
     };            
 })
@@ -214,14 +216,66 @@ stateService.set({
 }
 ```
 
-I'm currently working on array handling, but for now array entries cannot be subscribed or manipulated individually.
-Arrays are for now always treated as primitives.
+**Note**: You shouldn't use "_reducerMode" or "_arrayOperation" properties nested in a { _reducerMode: 'replace' } branch, 
+since this branch as a whole will be replaced and this special properties won't be handled.
 
 <h2> 2. In lit-element </h2>
 
 Same as using directly, just use the method ```this.setState()``` instead.
 
+<h1>Array operations</h1>
+
+Since I found it very cumbersome to subscribe / mutate array elements, I implemented array operators.
+
+<h2> Subscribing array elements </h2>
+To subscribe to a specific element in an array, you can provide a predicate function. The subscription will use the
+first element for which the function returns true. The syntax is:
+
+```
+ type ArraySubscriptionPredicate<ArrayName, ElementType> = { array: ArrayName, predicate: PredicateFunction<ElementType> };
+ type PredicateFunction<ArrayType> = (array: ArrayType, index?: number) => boolean;
+```
+
+Example:
+```
+this.subscribeState('books', { array: 'data', predicate => (book, index) => book.author === 'Me' || index === 10  }, value => {
+    value.previous // the value before change
+    value.current // the new value
+})
+```
+
+**Hint**: You can use array predicate function multiple times in the path (subscribe to elements in nested arrays). If you
+provide a string instead of the predicate object on an array, you will subscribe to the whole array. When you subscribe to
+an array as a whole, this is the last segment in the path.
+
+<h2> Manipulating array elements </h2>
+In your state changes you can also use this syntax to update, push or pull (remove) array elements:
+
+```
+{
+    _arrayOperation:
+        { op: 'update', at: PredicateFunction<State[number]> | number, val: StateChange<State[number]> | ((element: State[number]) => StateChange<State[number]>) } |
+        { op: 'push', at?: number, val: State[number] } |
+        { op: 'pull', at?: PredicateFunction<State[number]> | number }
+}
+```
+
+Example:
+```
+stateService.set({
+    books: {
+        data: {
+            _arrayOperation: { op: 'update', at: book => book.author === 'Mark Twain', val: book => book.title === 'Tom Sawyer' ? { title: "Huckleberry Finn" } : {} }
+        }
+    };            
+})
+```
+
+**Hint**: You can also nest those operations and use the _reducerMode property in the "val" object. 
+
 <h1>(WIP) Persist state</h1>
+
+NOT FINISHED - DON'T USE!!
 
 To persist state and reload it on service instantiation, provide an array of cache handlers in the state option's ```cache``` property.
 

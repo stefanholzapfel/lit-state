@@ -1,10 +1,16 @@
-import {StateSubscriptionFunction, SubscribeStateFromElementOptions, SubscribeStateOptions} from './index';
+import {
+    ArraySubscriptionPredicate,
+    StateSubscriptionFunction,
+    SubscribeStateFromElementOptions,
+    SubscribeStateOptions
+} from './index';
 import {deepCopy} from './litElementState.helpers';
 
 export class LitElementStateSubscription<SubscribedType> {
     previousValue: SubscribedType = null;
     value: SubscribedType = null;
-    path: string[];
+    valueDeepCopy: SubscribedType = null;
+    path: (string | ArraySubscriptionPredicate<string, any>)[];
     closed = false;
     
     private subscriptionFunction;
@@ -12,7 +18,7 @@ export class LitElementStateSubscription<SubscribedType> {
     subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
     
     constructor(
-        path: string[],
+        path: (string | ArraySubscriptionPredicate<string, any>)[],
         subscriptionFunction: StateSubscriptionFunction<SubscribedType>,
         unsubscriptionFunction: (
             subscription: LitElementStateSubscription<any>
@@ -24,27 +30,22 @@ export class LitElementStateSubscription<SubscribedType> {
         this.unsubscribeFunction = unsubscriptionFunction;
         this.subscriptionOptions = subscriptionOptions;
     }
-    
+
     next(value: SubscribedType, initial = false) {
-        if (this.value !== value || this.subscriptionOptions.pushNestedChanges || initial) {
-            this.previousValue = deepCopy(this.value);
-            this.value = value;
-            if (!(initial && !this.subscriptionOptions.getInitialValue)) {
-                this.emitValue();
-            }
+        this.value = value;
+        this.previousValue = this.valueDeepCopy;
+        this.valueDeepCopy = deepCopy(value);
+        if (!initial || this.subscriptionOptions.getInitialValue) {
+            this.subscriptionFunction(
+                {
+                    previous: this.previousValue,
+                    current: this.subscriptionOptions.getDeepCopy ?
+                        this.valueDeepCopy : this.value
+                }
+            );
         }
     }
-    
-    emitValue() {
-        this.subscriptionFunction(
-            {
-                previous: this.previousValue,
-                current: this.subscriptionOptions.getDeepCopy ?
-                    deepCopy(this.value) : this.value
-            }
-        );
-    }
-    
+
     unsubscribe() {
         this.unsubscribeFunction(this);
         this.closed = true;

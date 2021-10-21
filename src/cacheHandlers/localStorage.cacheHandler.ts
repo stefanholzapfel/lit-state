@@ -1,14 +1,15 @@
-import {CacheHandler, LitElementStateService, ReducableState} from '../index';
+import {CacheHandler, LitElementStateService, StateChange} from '../index';
 import {isExceptionFromDeepReduce, isObject} from '../litElementState.helpers';
 import {DeepPartial} from 'ts-essentials';
 
 const LOCALSTORAGE_PREFIX = 'lit-state';
 
 class LocalStorageCacheHandler<State> implements CacheHandler<State> {
+    // TODO: ensure that this works with array feature
     name = 'localstorage';
     private localStorageKeys = new Set<string>();
 
-    load(stateServiceInstance: LitElementStateService<State>): ReducableState<State> | DeepPartial<State> {
+    load(stateServiceInstance: LitElementStateService<State>): StateChange<State> | DeepPartial<StateChange<State>> {
         const res = {} as DeepPartial<State>;
         const fullPrefix = this.getFullPrefix(stateServiceInstance);
         for (const key in localStorage) {
@@ -30,7 +31,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                 }
             }
         }
-        return res;
+        return res as any;
     }
 
     private setValue(object: DeepPartial<State>, path: string[], value: any) {
@@ -46,7 +47,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         });
     };
 
-    set(change: ReducableState<State> | DeepPartial<ReducableState<State>>, stateServiceInstance: LitElementStateService<State>) {
+    set(change: StateChange<State> | DeepPartial<StateChange<State>>, stateServiceInstance: LitElementStateService<State>) {
         const path = [ LOCALSTORAGE_PREFIX ];
         if (!!stateServiceInstance?.config?.cache?.name) {
             path.push(stateServiceInstance.config.cache.name);
@@ -54,7 +55,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         this.setRecursive(change, path);
     }
 
-    private setRecursive(change: ReducableState<State> | DeepPartial<ReducableState<State>>, path: string[]) {
+    private setRecursive(change: StateChange<State> | DeepPartial<StateChange<State>>, path: string[]) {
         for (const key in change as any) {
             if (!isExceptionFromDeepReduce(change[key])) {
                 if (isObject(change[key]) && !Array.isArray(change[key])) {
