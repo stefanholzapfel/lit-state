@@ -13,7 +13,7 @@ export interface StateConfig<State> {
 export interface CacheHandler<State> {
     name: string;
 
-    set(change: StateChange<State> | DeepPartial<StateChange<State>>, stateServiceInstance: LitElementStateService<State>);
+    set(change: DeepPartial<StateChange<State>>, stateServiceInstance: LitElementStateService<State>);
 
     load(stateServiceInstance: LitElementStateService<State>): StateChange<State> | DeepPartial<StateChange<State>>;
 }
@@ -46,17 +46,16 @@ export interface SubscribeStateFromElementOptions extends SubscribeStateOptions 
 export type StateChange<State> =
     State extends Array<any> ?
         {
-            _arrayOperation: { op: 'update', val: State[number] | StateChange<State[number]> , at: PredicateFunction<State[number]> | number }
+            _arrayOperation:
+                { op: 'update', at: PredicateFunction<State[number]> | number, val: StateChange<State[number]> | ((element: State[number]) => StateChange<State[number]>) } |
+                { op: 'push', at?: number, val: State[number] } |
+                { op: 'pull', at?: PredicateFunction<State[number]> | number }
         } |
-        { _arrayOperation: { op: 'push', val: State[number], at?: number } } |
-        { _arrayOperation: { op: 'pull', at?: PredicateFunction<State[number]> | number } } |
         State :
-            State extends Object ?
-                { _reducerMode?: StateReducerMode } &
-                {
-                    [P in keyof State]?:
-                        StateChange<State[P]>
-                } : State;
+        {
+            [P in keyof State]?:
+            State[P] | StateChange<State[P]>
+        } & { _reducerMode?: StateReducerMode };
 
 export * from './litElementStateful';
 export * from './litElementState.service';

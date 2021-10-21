@@ -9,6 +9,7 @@ import {deepCopy} from './litElementState.helpers';
 export class LitElementStateSubscription<SubscribedType> {
     previousValue: SubscribedType = null;
     value: SubscribedType = null;
+    valueDeepCopy: SubscribedType = null;
     path: (string | ArraySubscriptionPredicate<string, any>)[];
     closed = false;
     
@@ -29,20 +30,19 @@ export class LitElementStateSubscription<SubscribedType> {
         this.unsubscribeFunction = unsubscriptionFunction;
         this.subscriptionOptions = subscriptionOptions;
     }
-    
+
     next(value: SubscribedType, initial = false) {
-        if (this.value !== value || this.subscriptionOptions.pushNestedChanges || initial) {
-            this.previousValue = deepCopy(this.value);
-            this.value = value;
-            if (!(initial && !this.subscriptionOptions.getInitialValue)) {
-                this.subscriptionFunction(
-                    {
-                        previous: this.previousValue,
-                        current: this.subscriptionOptions.getDeepCopy ?
-                            deepCopy(this.value) : this.value
-                    }
-                );
-            }
+        this.value = value;
+        this.previousValue = this.valueDeepCopy;
+        this.valueDeepCopy = deepCopy(value);
+        if (!initial || this.subscriptionOptions.getInitialValue) {
+            this.subscriptionFunction(
+                {
+                    previous: this.previousValue,
+                    current: this.subscriptionOptions.getDeepCopy ?
+                        this.valueDeepCopy : this.value
+                }
+            );
         }
     }
 

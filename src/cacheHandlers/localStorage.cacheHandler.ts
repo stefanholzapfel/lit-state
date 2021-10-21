@@ -5,10 +5,11 @@ import {DeepPartial} from 'ts-essentials';
 const LOCALSTORAGE_PREFIX = 'lit-state';
 
 class LocalStorageCacheHandler<State> implements CacheHandler<State> {
+    // TODO: ensure that this works with array feature
     name = 'localstorage';
     private localStorageKeys = new Set<string>();
 
-    load(stateServiceInstance: LitElementStateService<State>): StateChange<State> | DeepPartial<State> {
+    load(stateServiceInstance: LitElementStateService<State>): StateChange<State> | DeepPartial<StateChange<State>> {
         const res = {} as DeepPartial<State>;
         const fullPrefix = this.getFullPrefix(stateServiceInstance);
         for (const key in localStorage) {
@@ -30,7 +31,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                 }
             }
         }
-        return res;
+        return res as any;
     }
 
     private setValue(object: DeepPartial<State>, path: string[], value: any) {
