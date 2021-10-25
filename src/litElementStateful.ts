@@ -3,7 +3,7 @@ import { LitElement } from 'lit';
 import {
     StateSubscriptionFunction,
     StateChange,
-    SubscribeStateFromElementOptions, ArraySubscriptionPredicate
+    SubscribeStateFromElementOptions, ArraySubscriptionPredicate, SubscribeStateOptions
 } from './index';
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
@@ -35,30 +35,57 @@ export class LitElementStateful<State> extends LitElement {
     // Overloads
     subscribeState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1,T1> | K1 : K1,
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
         subscriptionFunction: StateSubscriptionFunction<T1>,
-        options?: SubscribeStateFromElementOptions
+        options?: SubscribeStateOptions
+    ): LitElementStateSubscription<T1>;
+    subscribeState<K1 extends keyof State,
+        T1 extends State[K1]>(
+        k1: K1,
+        subscriptionFunction: StateSubscriptionFunction<T1>,
+        options?: SubscribeStateOptions
     ): LitElementStateSubscription<T1>;
     subscribeState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1,
         T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1,T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2,T2> | K2 : K2,
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
         subscriptionFunction: StateSubscriptionFunction<T2>,
-        options?: SubscribeStateFromElementOptions
-    ): LitElementStateSubscription<T1[K2]>;
+        options?: SubscribeStateOptions
+    ): LitElementStateSubscription<T2>;
+    subscribeState<K1 extends keyof State,
+        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
+        K2 extends keyof T1,
+        T2 extends T1[K2]>(
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: K2,
+        subscriptionFunction: StateSubscriptionFunction<T2>,
+        options?: SubscribeStateOptions
+    ): LitElementStateSubscription<T2>;
     subscribeState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1,
         T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
         K3 extends keyof T2,
         T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1,T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2,T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3,T3> | K3 : K3,
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
         subscriptionFunction: StateSubscriptionFunction<T3>,
-        options?: SubscribeStateFromElementOptions
+        options?: SubscribeStateOptions
+    ): LitElementStateSubscription<T3>;
+    subscribeState<K1 extends keyof State,
+        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
+        K2 extends keyof T1,
+        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
+        K3 extends keyof T2,
+        T3 extends T2[K3]>(
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+        k3: K3,
+        subscriptionFunction: StateSubscriptionFunction<T3>,
+        options?: SubscribeStateOptions
     ): LitElementStateSubscription<T3>;
     subscribeState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
@@ -68,12 +95,27 @@ export class LitElementStateful<State> extends LitElement {
         T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
         K4 extends keyof T3,
         T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1,T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2,T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3,T3> : K3,
-        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4,T4> | K4 : K4,
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
+        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
         subscriptionFunction: StateSubscriptionFunction<T4>,
-        options?: SubscribeStateFromElementOptions
+        options?: SubscribeStateOptions
+    ): LitElementStateSubscription<T4>;
+    subscribeState<K1 extends keyof State,
+        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
+        K2 extends keyof T1,
+        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
+        K3 extends keyof T2,
+        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
+        K4 extends keyof T3,
+        T4 extends T3[K4]>(
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
+        k4: K4,
+        subscriptionFunction: StateSubscriptionFunction<T4>,
+        options?: SubscribeStateOptions
     ): LitElementStateSubscription<T4>;
     subscribeState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
@@ -85,13 +127,31 @@ export class LitElementStateful<State> extends LitElement {
         T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
         K5 extends keyof T4,
         T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1,T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2,T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3,T3> : K3,
-        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4,T4> : K4,
-        k5: T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5,T5> | K5 : K5,
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
+        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
+        k5: T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5,
         subscriptionFunction: StateSubscriptionFunction<T5>,
-        options?: SubscribeStateFromElementOptions
+        options?: SubscribeStateOptions
+    ): LitElementStateSubscription<T5>;
+    subscribeState<K1 extends keyof State,
+        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
+        K2 extends keyof T1,
+        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
+        K3 extends keyof T2,
+        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
+        K4 extends keyof T3,
+        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
+        K5 extends keyof T4,
+        T5 extends T4[K5]>(
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
+        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
+        k5: K5,
+        subscriptionFunction: StateSubscriptionFunction<T5>,
+        options?: SubscribeStateOptions
     ): LitElementStateSubscription<T5>;
     subscribeState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
@@ -105,14 +165,35 @@ export class LitElementStateful<State> extends LitElement {
         T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
         K6 extends keyof T5,
         T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1,T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2,T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3,T3> : K3,
-        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4,T4> : K4,
-        k5: T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5,T5> : K5,
-        k6: T5[K6] extends Array<any> ? ArraySubscriptionPredicate<K6,T6> | K6 : K6,
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
+        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
+        k5: T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5,
+        k6: T5[K6] extends Array<any> ? ArraySubscriptionPredicate<K6, T6> : K6,
         subscriptionFunction: StateSubscriptionFunction<T6>,
-        options?: SubscribeStateFromElementOptions
+        options?: SubscribeStateOptions
+    ): LitElementStateSubscription<T6>;
+    subscribeState<K1 extends keyof State,
+        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
+        K2 extends keyof T1,
+        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
+        K3 extends keyof T2,
+        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
+        K4 extends keyof T3,
+        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
+        K5 extends keyof T4,
+        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
+        K6 extends keyof T5,
+        T6 extends T5[K6]>(
+        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
+        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
+        k5: T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5,
+        k6: K6,
+        subscriptionFunction: StateSubscriptionFunction<T6>,
+        options?: SubscribeStateOptions
     ): LitElementStateSubscription<T6>;
     // Implementation
     subscribeState<Part>(

@@ -238,7 +238,7 @@ first element for which the function returns true. The syntax is:
 
 Example:
 ```
-this.subscribeState('books', { array: 'data', predicate => (book, index) => book.author === 'Me' || index === 10  }, value => {
+this.subscribeState('books', { array: 'data', predicate: (book, index) => book.author === 'Me' || index === 10  }, value => {
     value.previous // the value before change
     value.current // the new value
 })
