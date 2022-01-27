@@ -57,30 +57,33 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
 
     private setRecursive(change: StateChange<State> | DeepPartial<StateChange<State>>, path: string[]) {
         for (const key in change as any) {
+            const fullPath = [ ...path, key ];
+            const pathString = fullPath.join('.');
             if (!isExceptionFromDeepReduce(change[key])) {
                 if (isObject(change[key]) && !Array.isArray(change[key])) {
                     if ('_reducerMode' in change[key] && change[key]._reducerMode === 'replace') {
-                        this.unset([ ...path, key ]);
+                        this.unset(pathString);
                     }
                     const newPart = { ...change[key] };
                     delete newPart._reducerMode;
-                    this.setRecursive(newPart, [ ...path, key ]);
+                    this.setRecursive(newPart, fullPath);
                 } else {
                     if (change[key] === null || change[key] === undefined) {
-                        this.unset([ ...path, key ]);
+                        this.unset(pathString);
                     } else {
-                        localStorage.setItem([ ...path, key ].join('.'), JSON.stringify({ v: change[key], t: Array.isArray(change[key]) ? 'array' : typeof change[key] }));
+                        localStorage.setItem(pathString, JSON.stringify({ v: change[key], t: Array.isArray(change[key]) ? 'array' : typeof change[key] }));
+                        if (!this.localStorageKeys.has(pathString)) this.localStorageKeys.add(pathString);
                     }
                 }
             } else  {
-                this.unset([ ...path, key ]);
+                this.unset(pathString);
             }
         }
     }
 
-    private unset(path: string[]) {
+    private unset(path: string) {
         for (let localStorageKey of this.localStorageKeys.values()) {
-            if (localStorageKey.startsWith(path.join('.'))) {
+            if (localStorageKey.startsWith(path)) {
                 localStorage.removeItem(localStorageKey);
                 this.localStorageKeys.delete(localStorageKey);
             }
