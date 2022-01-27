@@ -277,7 +277,7 @@ stateService.set({
 
 NOT FINISHED - DON'T USE!!
 
-To persist state and reload it on service instantiation, provide an array of cache handlers in the state option's ```cache``` property.
+To persist state and reload it on service instantiation provide an array of cache handlers in the state option's ```cache``` property.
 
 Optionally you can also provide a name to enable the cache handler to use different persistent caches for different state services.
 

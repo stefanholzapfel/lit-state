@@ -19,7 +19,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                 const entry = JSON.parse(localStorage.getItem(key));
                 switch (entry.t) {
                     case 'boolean':
-                        this.setValue(res, path, entry.v === 'true');
+                        this.setValue(res, path, entry.v === true);
                         break;
                     case 'number':
                         this.setValue(res, path, +entry.v);
@@ -65,7 +65,6 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                     const newPart = { ...change[key] };
                     delete newPart._reducerMode;
                     this.setRecursive(newPart, [ ...path, key ]);
-
                 } else {
                     if (change[key] === null || change[key] === undefined) {
                         this.unset([ ...path, key ]);
