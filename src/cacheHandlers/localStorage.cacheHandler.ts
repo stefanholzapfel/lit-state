@@ -62,8 +62,10 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                     if ('_reducerMode' in change[key] && change[key]._reducerMode === 'replace') {
                         this.unset([ ...path, key ]);
                     }
-                    delete change[key]._reducerMode;
-                    this.setRecursive(change[key], [ ...path, key ]);
+                    const newPart = { ...change[key] };
+                    delete newPart._reducerMode;
+                    this.setRecursive(newPart, [ ...path, key ]);
+
                 } else {
                     if (change[key] === null || change[key] === undefined) {
                         this.unset([ ...path, key ]);
