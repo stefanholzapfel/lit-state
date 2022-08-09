@@ -333,7 +333,7 @@ export class LitElementStateService<State> {
                     } else if (arrayOperation.at instanceof Function) {
                         const indices = []
                         state[key].forEach((elem, index) => {
-                           if ([elem].find(arrayOperation.at))  indices.push(index);
+                           if ([elem].find(arrayOperation.at)) indices.push(index);
                         });
                         indices.forEach(index => {
                             const val = valIsFunction ? arrayOperation.val(state[key][index]) : arrayOperation.val;
