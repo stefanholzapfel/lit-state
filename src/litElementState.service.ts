@@ -290,7 +290,7 @@ export class LitElementStateService<State> {
         subscriptionPath: (string | ArraySubscriptionPredicate<string, any>)[],
         state: State
     ): DeepPartial<State> {
-        let partial = state;
+        let partial = state as object;
         for (let [index, segment] of subscriptionPath.entries()) {
             const isLastSegmentInPath = index === subscriptionPath.length - 1;
             if ((typeof segment === 'object') && segment.hasOwnProperty('array')) {
