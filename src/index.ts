@@ -12,9 +12,7 @@ export interface StateConfig<State> {
 
 export interface CacheHandler<State> {
     name: string;
-
     set(change: DeepPartial<StateChange<State>>, stateServiceInstance: LitElementStateService<State>);
-
     load(stateServiceInstance: LitElementStateService<State>): StateChange<State> | DeepPartial<StateChange<State>>;
 }
 
