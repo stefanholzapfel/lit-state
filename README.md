@@ -1,5 +1,5 @@
 # lit-state
-A lightweight reactive state management for Lit 2
+A lightweight reactive state management for Lit
 
 <h1>Installation</h1>
 
