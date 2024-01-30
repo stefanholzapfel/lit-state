@@ -1,6 +1,6 @@
 {
   "name": "@stefanholzapfel/lit-state",
-  "version": "3.4.16",
+  "version": "3.4.17",
   "description": "A reactive state management for Lit",
   "publishConfig": {
     "access": "public"
@@ -16,11 +16,11 @@
   "author": "Stefan Holzapfel",
   "license": "MIT",
   "dependencies": {
-    "lit": "^3.0.2",
+    "lit": "^3.1.1",
     "ts-essentials": "^9.4.1"
   },
   "devDependencies": {
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.3"
   },
   "type": "module",
   "types": "dist/index.d.ts",
