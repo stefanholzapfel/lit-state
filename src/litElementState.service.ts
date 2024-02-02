@@ -1,7 +1,7 @@
 import {DeepPartial} from 'ts-essentials';
 import {
     ArraySubscriptionPredicate,
-    CacheHandler,
+    CacheHandler, PredicateFunction,
     StateChange,
     StateConfig,
     StateSubscriptionFunction,
@@ -257,7 +257,7 @@ export class LitElementStateService<State> {
         }
     }
 
-    set(statePartial: DeepPartial<StateChange<State>>, cacheHandlerName?: string): void {
+    set(statePartial: StateChange<State>, cacheHandlerName?: string): void {
         if (cacheHandlerName) {
             const cacheHandler = this.cacheHandlers.get(cacheHandlerName);
             if (!cacheHandler) {
@@ -274,6 +274,25 @@ export class LitElementStateService<State> {
             this.checkSubscriptionChange(subscription);
         }
     };
+
+    setStateInPath<EntityTypeInPath>(path: (string | number | PredicateFunction<any>)[], change: StateChange<EntityTypeInPath>) {
+        let statePartial = {};
+        let currentProperty = statePartial;
+        for (const [index, segment] of path) {
+            if (typeof segment === 'string') {
+                currentProperty[segment] = index < path.length - 1 ? {} : change;
+                currentProperty = currentProperty[segment];
+            } else if (typeof segment === 'number' || segment instanceof Function) {
+                currentProperty['_arrayOperation'] = {
+                    op: 'update',
+                    at: segment,
+                    val: index < path.length - 1 ? {} : change
+                };
+                currentProperty = currentProperty['_arrayOperation']['val'];
+            }
+        }
+        this.set(statePartial);
+    }
 
     private checkSubscriptionChange(subscription: LitElementStateSubscription<any>) {
         const newValue = this.getSubscriptionData(
@@ -316,7 +335,7 @@ export class LitElementStateService<State> {
             // Handle array operators
             if (isObject(change[key]) && '_arrayOperation' in change[key]) {
                 if (!state[key]) {
-                    state[key] = []
+                    state[key] = [] as any;
                 }
                 const arrayOperation = change[key]._arrayOperation;
                 if (arrayOperation.op === 'update') {

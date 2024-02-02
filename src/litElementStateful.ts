@@ -3,7 +3,7 @@ import { LitElement } from 'lit';
 import {
     StateSubscriptionFunction,
     StateChange,
-    SubscribeStateFromElementOptions, ArraySubscriptionPredicate, SubscribeStateOptions
+    SubscribeStateFromElementOptions, ArraySubscriptionPredicate, SubscribeStateOptions, PredicateFunction
 } from './index';
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
@@ -28,8 +28,12 @@ export class LitElementStateful<State> extends LitElement {
         return this.stateService.state;
     };
 
-    setState(statePartial: DeepPartial<StateChange<State>>, cacheHandlerName?: string) {
+    setState(statePartial: StateChange<State>, cacheHandlerName?: string) {
         this.stateService.set(statePartial, cacheHandlerName);
+    }
+
+    setStateInPath<EntityTypeInPath>(path: (string | number | PredicateFunction<any>)[], change: StateChange<EntityTypeInPath>) {
+        this.stateService.setStateInPath(path, change);
     }
 
     // Overloads
