@@ -156,9 +156,9 @@ litService.set({
 })
 ```
 
-The changes will get merged into the existing state, meaning the other properties in "app" stay untouched.
+The changes will get merged into the existing state, meaning the other properties in `app` stay untouched.
 
-In some cases you want to replace a property with nested objects as a whole. For that, there is the "_reducerMode"
+In some cases you might want to replace a property with nested objects as a whole. For that, there is the `_reducerMode`
 flag. This keyword is reserved and shouldn't be used in your state.
 
 An example:
@@ -216,8 +216,29 @@ stateService.set({
 }
 ```
 
-**Note**: You shouldn't use "_reducerMode" or "_arrayOperation" properties nested in a { _reducerMode: 'replace' } branch, 
+**Note**: You shouldn't use `_reducerMode` or `_arrayOperation` properties nested in a `{ _reducerMode: 'replace' }` branch, 
 since this branch as a whole will be replaced and this special properties won't be handled.
+
+When you have changes in a deeply nested paths you can use the `entryPath` on the `SetStateOptions` to navigate to the entryPoint for you change. E.g. if instead of
+
+```
+stateService.set({
+    books: {
+        bookCount: 0;
+    };            
+})
+```
+
+you could write:
+
+```
+stateService.set(0, { entryPath: ['books', 'bookCount'] })
+```
+
+It's a matter of taste if / when to use this array notiation for navigating to the entry point, but some users might find it more elegant.
+
+**Hint**: You can use a PredicateFunction or the index for array navigation in your entry path (see section "Array operations")
+
 
 <h2> 2. In lit-element </h2>
 
@@ -225,7 +246,7 @@ Same as using directly, just use the method ```this.setState()``` instead.
 
 <h1>Array operations</h1>
 
-Since I found it very cumbersome to subscribe / mutate array elements, I implemented array operators.
+Since it is cumbersome to subscribe / mutate array elements, we have array operators.
 
 <h2> Subscribing array elements </h2>
 To subscribe to a specific element in an array, you can provide a predicate function. The subscription will use the
@@ -305,19 +326,19 @@ The LocalStorageCacheHandler is provided with this package (others may follow). 
 
 If you provide multiple handlers, they will load their initial state in the order you provide them (and therefore may overwrite each other).
 
-To persist a state change provide the name of the cache handler to use:
+To persist a state change provide the name of the cache handler to use in the options parameter:
 
 ```
 stateService.set(
     { exampleState: { offline: true } },
-    'localstorage'
+    { cacheHandlerName: 'localstorage' }
 )
 ```
 or in LitElementStateful:
 ```
 this.setState(
     { exampleState: { offline: true } },
-    'localstorage'
+    { cacheHandlerName: 'localstorage' }
 )
 ```
 

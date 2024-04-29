@@ -90,7 +90,7 @@ export const deepCompare = (one, two): boolean =>  {
     }
 }
 
-export const optionsFromDefaultOrParams = (params: any[], service: LitElementStateService<any>): SubscribeStateFromElementOptions => {
+export const subscribeOptionsFromDefaultOrParams = (params: any[], service: LitElementStateService<any>): SubscribeStateFromElementOptions => {
     let options = service.config.defaultSubscribeOptions;
     if (
         params[params.length - 1].hasOwnProperty('getInitialValue') ||

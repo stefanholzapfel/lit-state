@@ -1,13 +1,15 @@
-import {DeepPartial} from 'ts-essentials';
 import { LitElement } from 'lit';
 import {
     StateSubscriptionFunction,
     StateChange,
-    SubscribeStateFromElementOptions, ArraySubscriptionPredicate, SubscribeStateOptions, PredicateFunction
+    SubscribeStateFromElementOptions,
+    ArraySubscriptionPredicate,
+    SubscribeStateOptions,
+    SetStateOptions
 } from './index';
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
-import {optionsFromDefaultOrParams} from './litElementState.helpers';
+import {subscribeOptionsFromDefaultOrParams} from './litElementState.helpers';
 
 export class LitElementStateful<State> extends LitElement {
     private autoUnsubscribeCache: Map<LitElementStateSubscription<any>, any> = new Map();
@@ -28,15 +30,8 @@ export class LitElementStateful<State> extends LitElement {
         return this.stateService.state;
     };
 
-    setState(statePartial: StateChange<State>, cacheHandlerName?: string) {
-        this.stateService.set(statePartial, cacheHandlerName);
-    }
-
-    setStateInPath<EntityTypeInPath>(path: (string | number | PredicateFunction<any>)[], change: StateChange<EntityTypeInPath>) {
-        this.stateService.setStateInPath(path, change);
-    }
-
     // Overloads
+    // TODO: Replace with EntryPath for v5
     subscribeState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1])>(
         k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
@@ -377,7 +372,7 @@ export class LitElementStateful<State> extends LitElement {
     connectState<Part>(
         ...params: (string | ArraySubscriptionPredicate<string, any> | SubscribeStateFromElementOptions)[]
     ): LitElementStateSubscription<Part> {
-        const options = optionsFromDefaultOrParams(params, this.stateService);
+        const options = subscribeOptionsFromDefaultOrParams(params, this.stateService);
         const propertyName = params.pop() as string;
         const subscriptionFunction = data => {
             if (propertyName in this) {
@@ -395,6 +390,12 @@ export class LitElementStateful<State> extends LitElement {
             this.autoUnsubscribeCache.set(subscription, params);
         }
         return subscription;
+    }
+
+    setState(
+        statePartial: StateChange<State>,
+        options?: SetStateOptions<State>) {
+        this.stateService.set(statePartial, options);
     }
 
     connectedCallback(): void {

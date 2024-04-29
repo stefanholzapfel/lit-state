@@ -1,7 +1,7 @@
 import {DeepPartial} from 'ts-essentials';
 import {
     ArraySubscriptionPredicate,
-    CacheHandler, PredicateFunction,
+    CacheHandler, SetStateOptions,
     StateChange,
     StateConfig,
     StateSubscriptionFunction,
@@ -12,7 +12,7 @@ import {
     deepCompare,
     isExceptionFromDeepReduce,
     isObject,
-    optionsFromDefaultOrParams
+    subscribeOptionsFromDefaultOrParams
 } from './litElementState.helpers';
 
 export class LitElementStateService<State> {
@@ -59,7 +59,7 @@ export class LitElementStateService<State> {
         return LitElementStateService._globalInstance;
     }
 
-    // TODO: autocomplete for path segments (k1 - k6) not working anymore (due to T "extends" condition?)
+    // TODO: Replace with EntryPath for v5
     // Overloads
     subscribe<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1])>(
@@ -227,7 +227,7 @@ export class LitElementStateService<State> {
     subscribe<Part>(
         ...params: (string | ArraySubscriptionPredicate<string, any> | StateSubscriptionFunction<Part> | SubscribeStateOptions)[]
     ): LitElementStateSubscription<Part> {
-        const options = optionsFromDefaultOrParams(params, this);
+        const options = subscribeOptionsFromDefaultOrParams(params, this);
         const subscriptionFunction = params.pop() as StateSubscriptionFunction<Part>;
         const subscription = new LitElementStateSubscription<Part>(
             params as any,
@@ -257,11 +257,32 @@ export class LitElementStateService<State> {
         }
     }
 
-    set(statePartial: StateChange<State>, cacheHandlerName?: string): void {
-        if (cacheHandlerName) {
-            const cacheHandler = this.cacheHandlers.get(cacheHandlerName);
+    set<TargetedState = State, RootState = State>(
+        statePartial: StateChange<TargetedState>,
+        options?: SetStateOptions<RootState>
+    ): void {
+        if (options?.entryPath) {
+            let _statePartial = {} as any;
+            let currentProperty = _statePartial;
+            for (const [index, segment] of options.entryPath.entries()) {
+                if (typeof segment === 'string') {
+                    currentProperty[segment] = index < options.entryPath.length - 1 ? {} : statePartial;
+                    currentProperty = currentProperty[segment];
+                } else if (typeof segment === 'number' || segment instanceof Function) {
+                    currentProperty['_arrayOperation'] = {
+                        op: 'update',
+                        at: segment,
+                        val: index < options.entryPath.length - 1 ? {} : statePartial
+                    };
+                    currentProperty = currentProperty['_arrayOperation']['val'];
+                }
+            }
+            statePartial = _statePartial;
+        }
+        if (options?.cacheHandlerName) {
+            const cacheHandler = this.cacheHandlers.get(options.cacheHandlerName);
             if (!cacheHandler) {
-                console.error(`lit-state: A cache handler with name ${cacheHandlerName} was not registered! This set call will not be persisted!`)
+                console.error(`lit-state: A cache handler with name ${options.cacheHandlerName} was not registered! This set call will not be persisted!`)
             } else {
                 cacheHandler.set(statePartial, this);
             }
@@ -274,25 +295,6 @@ export class LitElementStateService<State> {
             this.checkSubscriptionChange(subscription);
         }
     };
-
-    setStateInPath<EntityTypeInPath>(path: (string | number | PredicateFunction<any>)[], change: StateChange<EntityTypeInPath>) {
-        let statePartial = {};
-        let currentProperty = statePartial;
-        for (const [index, segment] of path) {
-            if (typeof segment === 'string') {
-                currentProperty[segment] = index < path.length - 1 ? {} : change;
-                currentProperty = currentProperty[segment];
-            } else if (typeof segment === 'number' || segment instanceof Function) {
-                currentProperty['_arrayOperation'] = {
-                    op: 'update',
-                    at: segment,
-                    val: index < path.length - 1 ? {} : change
-                };
-                currentProperty = currentProperty['_arrayOperation']['val'];
-            }
-        }
-        this.set(statePartial);
-    }
 
     private checkSubscriptionChange(subscription: LitElementStateSubscription<any>) {
         const newValue = this.getSubscriptionData(
@@ -330,7 +332,7 @@ export class LitElementStateService<State> {
         }
     }
 
-    private deepReduce(state: State, change: StateChange<State> | DeepPartial<StateChange<State>>) {
+    private deepReduce(state: State, change: StateChange<State>) {
         for (const key in change as any) {
             // Handle array operators
             if (isObject(change[key]) && '_arrayOperation' in change[key]) {

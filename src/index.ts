@@ -12,7 +12,7 @@ export interface StateConfig<State> {
 
 export interface CacheHandler<State> {
     name: string;
-    set(change: DeepPartial<StateChange<State>>, stateServiceInstance: LitElementStateService<State>);
+    set(change: StateChange<State>, stateServiceInstance: LitElementStateService<State>);
     load(stateServiceInstance: LitElementStateService<State>): StateChange<State> | DeepPartial<StateChange<State>>;
 }
 
@@ -36,6 +36,17 @@ export interface SubscribeStateOptions {
     pushNestedChanges?: boolean;
     getDeepCopy?: boolean;
 }
+
+export interface SetStateOptions<State> {
+    // Ṕrovide the name of a cache handler to use it for persistence with this set state call
+    cacheHandlerName?: string;
+    entryPath?: StateEntryPath<State>;
+}
+
+export type StateEntryPath<State, Key extends (PropertyKey | PredicateFunction<any>)[] = []> =
+    State extends readonly any[] ? Key | [...StateEntryPath<State[number], [...Key, number | PredicateFunction<State[number]>]>] :
+        State extends object ? Key | [...StateEntryPath<State[keyof State], [...Key, keyof State]>]
+            : Key;
 
 export interface SubscribeStateFromElementOptions extends SubscribeStateOptions {
     autoUnsubscribe?: boolean;
