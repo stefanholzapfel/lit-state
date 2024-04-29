@@ -13,6 +13,8 @@ Starts with version 3.4.15, please see commit history for earlier changes.
 ## [4]
 - Feat(set-state): Added options parameter with entryPath for easier state navigation
 - Feat(set-state): Correctly type and describe entryPath
+- Feat(deepReduce): Exempt "Element"
+- Chore(deps): Upgrade dependencies
 ### BREAKING CHANGE:
 This commit moves the cacheHandler attribute on the LitElementStateful.setState & LitElementStateService.set methods into an options object.
 When cacheHandlers have been used like e.g.:
