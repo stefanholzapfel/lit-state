@@ -112,6 +112,7 @@ export const isExceptionFromDeepReduce: (obj: any) => boolean = (obj) => {
         obj instanceof Promise ||
         obj instanceof AbortController ||
         obj instanceof File ||
-        obj instanceof Blob
+        obj instanceof Blob ||
+        obj instanceof Element
     );
 }
