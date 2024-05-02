@@ -9,7 +9,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
     name = 'localstorage';
     private localStorageKeys = new Set<string>();
 
-    load(stateServiceInstance: LitElementStateService<State>): StateChange<State> | DeepPartial<StateChange<State>> {
+    load(stateServiceInstance: LitElementStateService<State>): StateChange<State> {
         const res = {} as DeepPartial<State>;
         const fullPrefix = this.getFullPrefix(stateServiceInstance);
         for (const key in localStorage) {

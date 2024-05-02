@@ -257,10 +257,11 @@ export class LitElementStateService<State> {
         }
     }
 
-    set<TargetedState = State, RootState = State>(
+    set<TargetedState = State>(
         statePartial: StateChange<TargetedState>,
-        options?: SetStateOptions<RootState>
+        options?: SetStateOptions<State>
     ): void {
+        let stateChange = statePartial as StateChange<State>;
         if (options?.entryPath) {
             let _statePartial = {} as any;
             let currentProperty = _statePartial;
@@ -277,19 +278,19 @@ export class LitElementStateService<State> {
                     currentProperty = currentProperty['_arrayOperation']['val'];
                 }
             }
-            statePartial = _statePartial;
+            stateChange = _statePartial as StateChange<State>;
         }
         if (options?.cacheHandlerName) {
             const cacheHandler = this.cacheHandlers.get(options.cacheHandlerName);
             if (!cacheHandler) {
                 console.error(`lit-state: A cache handler with name ${options.cacheHandlerName} was not registered! This set call will not be persisted!`)
             } else {
-                cacheHandler.set(statePartial, this);
+                cacheHandler.set(stateChange, this);
             }
         }
         this.deepReduce(
             this._state,
-            statePartial
+            stateChange
         );
         for (const subscription of this.stateSubscriptions) {
             this.checkSubscriptionChange(subscription);
