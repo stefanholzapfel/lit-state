@@ -219,7 +219,7 @@ stateService.set({
 **Note**: You shouldn't use `_reducerMode` or `_arrayOperation` properties nested in a `{ _reducerMode: 'replace' }` branch, 
 since this branch as a whole will be replaced and this special properties won't be handled.
 
-When you have changes in a deeply nested paths you can use the `entryPath` on the `SetStateOptions` to navigate to the entryPoint for you change. E.g. if instead of
+When you have changes in a deeply nested path you can use the `entryPath` on the `SetStateOptions` to navigate to the entryPoint for your change. E.g. if instead of
 
 ```
 stateService.set({
@@ -235,7 +235,7 @@ you could write:
 stateService.set(0, { entryPath: ['books', 'bookCount'] })
 ```
 
-It's a matter of taste if / when to use this array notiation for navigating to the entry point, but some users might find it more elegant.
+It's a matter of taste if / when to use this array notation for navigating to the entry point, but some users might find it more elegant.
 
 **Hint**: You can use a PredicateFunction or the index for array navigation in your entry path (see section "Array operations")
 
@@ -322,7 +322,7 @@ new LitElementStateService<State>({
 ```
 
 The LocalStorageCacheHandler is provided with this package (others may follow). You can implement your own following the
-```CachHandler``` interface.
+```CacheHandler``` interface.
 
 If you provide multiple handlers, they will load their initial state in the order you provide them (and therefore may overwrite each other).
 
