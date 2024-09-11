@@ -64,19 +64,19 @@ type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
 type NextDigit = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 'STOP'];
 type Increment<Depth> = Depth extends Digit ? NextDigit[Depth] : 'STOP';
 
-export type IndexOrPredicateFunction = number | PredicateFunction<any>;
-export type StateEntryPath<Object, Path extends PropertyKey[] = [], Depth = 0> = Object extends object ?
+export type IndexOrPredicateFunction<Type> = number | PredicateFunction<Type>;
+export type StateEntryPath<Object, Path extends (PropertyKey | PredicateFunction<any>)[] = [], Depth = 0> = Object extends object ?
     Path |
     // Check if depth > max allowed
-    Depth extends string ?
+    (Depth extends string ?
             // ...if yes, don't typecheck deeper levels and allow everything (for performance reasons)
             [...Path, ...any[]] :
             // ...otherwise check if object is array
             (Object extends readonly any[] ?
                 // ...when array only allow index or PredicateFunction
-                StateEntryPath<Object[number], [...Path, IndexOrPredicateFunction], Increment<Depth>>
+                StateEntryPath<Object[number], [...Path, IndexOrPredicateFunction<Object[number]>], Increment<Depth>>
                 // ...when object generate type of all possible keys
-                : { [Key in keyof Object]: StateEntryPath<Object[Key], [...Path, Key], Increment<Depth>> }[keyof Object])
+                : { [Key in keyof Object]: StateEntryPath<Object[Key], [...Path, Key], Increment<Depth>> }[keyof Object]))
     : Path;
 
 export * from './litElementStateful';
