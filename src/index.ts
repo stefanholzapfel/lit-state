@@ -1,5 +1,10 @@
 import {LitElementStateService} from './litElementState.service';
 
+// TODO: test autoUnsubscribe
+// TODO: test array subscription via index and predicate function
+// TODO: Change Readme
+// TODO: Add breaking change to changelog
+
 export interface StateConfig<State> {
     cache?: {
         name?: string;
@@ -15,8 +20,8 @@ export interface CacheHandler<State> {
     load(stateServiceInstance: LitElementStateService<State>): StateChange<State>;
 }
 
-export type StateSubscriptionFunction<P> = (
-    value: Change<P>
+export type StateSubscriptionFunction<StatePart> = (
+    value: Change<StatePart>
 ) => void;
 
 export interface Change<P> {
@@ -27,7 +32,6 @@ export interface Change<P> {
 export type StateReducerMode = 'merge' | 'replace';
 
 export type PredicateFunction<ArrayType> = (array: ArrayType, index?: number) => boolean;
-export type ArraySubscriptionPredicate<ArrayName, ElementType> = { array: ArrayName, predicate: PredicateFunction<ElementType> };
 
 export interface SubscribeStateOptions {
     getInitialValue?: boolean;
@@ -39,7 +43,7 @@ export interface SubscribeStateOptions {
 export interface SetStateOptions<State> {
     // Ṕrovide the name of a cache handler to use it for persistence with this set state call
     cacheHandlerName?: string;
-    entryPath?: any;
+    entryPath?: StatePath<State>;
 }
 
 export interface SubscribeStateFromElementOptions extends SubscribeStateOptions {
@@ -60,13 +64,15 @@ export type StateChange<State> =
             State[P] | StateChange<State[P]>
         } & { _reducerMode?: StateReducerMode };
 
+// Helpers for StatePath type
 type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15;
 type NextDigit = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 'STOP'];
 type Increment<Depth> = Depth extends Digit ? NextDigit[Depth] : 'STOP';
 
 export type IndexOrPredicateFunction<Type> = number | PredicateFunction<Type>;
-export type StateEntryPath<Object, Path extends (PropertyKey | PredicateFunction<any>)[] = [], Depth = 0> = Object extends object ?
-    Path |
+export type StatePathKey = IndexOrPredicateFunction<any> | string;
+export type StatePath<Object, Path extends (string | IndexOrPredicateFunction<any>)[] = [], Depth = 0> = Object extends object ?
+    (Path |
     // Check if depth > max allowed
     (Depth extends string ?
             // ...if yes, don't typecheck deeper levels and allow everything (for performance reasons)
@@ -74,9 +80,9 @@ export type StateEntryPath<Object, Path extends (PropertyKey | PredicateFunction
             // ...otherwise check if object is array
             (Object extends readonly any[] ?
                 // ...when array only allow index or PredicateFunction
-                StateEntryPath<Object[number], [...Path, IndexOrPredicateFunction<Object[number]>], Increment<Depth>>
+                StatePath<Object[number], [...Path, IndexOrPredicateFunction<Object[number]>], Increment<Depth>>
                 // ...when object generate type of all possible keys
-                : { [Key in keyof Object]: StateEntryPath<Object[Key], [...Path, Key], Increment<Depth>> }[keyof Object]))
+                : { [Key in string & keyof Object]: StatePath<Object[Key], [...Path, Key], Increment<Depth>> }[string & keyof Object])))
     : Path;
 
 export * from './litElementStateful';

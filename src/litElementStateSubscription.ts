@@ -1,28 +1,26 @@
 import {
-    ArraySubscriptionPredicate,
+    StatePath,
     StateSubscriptionFunction,
     SubscribeStateFromElementOptions,
     SubscribeStateOptions
 } from './index';
 import {deepCopy} from './litElementState.helpers';
 
-export class LitElementStateSubscription<SubscribedType> {
+export class LitElementStateSubscription<State, SubscribedType> {
     previousValue: SubscribedType = null;
     value: SubscribedType = null;
     valueDeepCopy: SubscribedType = null;
-    path: (string | ArraySubscriptionPredicate<string, any>)[];
+    path: StatePath<State>;
     closed = false;
-    
+
     private subscriptionFunction;
-    private unsubscribeFunction: (subscription: LitElementStateSubscription<SubscribedType>) => void;
+    private unsubscribeFunction: (subscription: LitElementStateSubscription<State, SubscribedType>) => void;
     subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
-    
+
     constructor(
-        path: (string | ArraySubscriptionPredicate<string, any>)[],
+        path: StatePath<State>,
         subscriptionFunction: StateSubscriptionFunction<SubscribedType>,
-        unsubscriptionFunction: (
-            subscription: LitElementStateSubscription<any>
-        ) => void,
+        unsubscriptionFunction: (subscription: LitElementStateSubscription<State, SubscribedType>) => void,
         subscriptionOptions?: SubscribeStateOptions
     ) {
         this.path = path;

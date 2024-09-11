@@ -1,9 +1,8 @@
 import {DeepPartial} from 'ts-essentials';
 import {
-    ArraySubscriptionPredicate,
     CacheHandler, SetStateOptions,
     StateChange,
-    StateConfig,
+    StateConfig, StatePath, StatePathKey,
     StateSubscriptionFunction,
     SubscribeStateOptions
 } from './index';
@@ -18,7 +17,7 @@ import {
 export class LitElementStateService<State> {
     private static _globalInstance;
     config: StateConfig<State>;
-    private stateSubscriptions: LitElementStateSubscription<any>[] = [];
+    private stateSubscriptions: LitElementStateSubscription<State, any>[] = [];
     private cacheHandlers: Map<string, CacheHandler<State>> = new Map();
 
     constructor(
@@ -55,182 +54,18 @@ export class LitElementStateService<State> {
         return this._state;
     };
 
-    static getGlobalInstance<State>(): LitElementStateService<State> {
+    static getGlobalInstance<State>() {
         return LitElementStateService._globalInstance;
     }
 
-    // TODO: Replace with EntryPath for v5
-    // Overloads
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        subscriptionFunction: StateSubscriptionFunction<T1>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T1>;
-    subscribe<K1 extends keyof State,
-        T1 extends State[K1]>(
-        k1: K1,
-        subscriptionFunction: StateSubscriptionFunction<T1>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T1>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        subscriptionFunction: StateSubscriptionFunction<T2>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T2>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends T1[K2]>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: K2,
-        subscriptionFunction: StateSubscriptionFunction<T2>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T2>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-        subscriptionFunction: StateSubscriptionFunction<T3>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T3>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends T2[K3]>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        k3: K3,
-        subscriptionFunction: StateSubscriptionFunction<T3>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T3>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
-        subscriptionFunction: StateSubscriptionFunction<T4>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T4>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends T3[K4]>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-        k4: K4,
-        subscriptionFunction: StateSubscriptionFunction<T4>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T4>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
-        k5: T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5,
-        subscriptionFunction: StateSubscriptionFunction<T5>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T5>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends T4[K5]>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
-        k5: K5,
-        subscriptionFunction: StateSubscriptionFunction<T5>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T5>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6])>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
-        k5: T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5,
-        k6: T5[K6] extends Array<any> ? ArraySubscriptionPredicate<K6, T6> : K6,
-        subscriptionFunction: StateSubscriptionFunction<T6>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T6>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends T5[K6]>(
-        k1: State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-        k2: T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-        k3: T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-        k4: T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
-        k5: T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5,
-        k6: K6,
-        subscriptionFunction: StateSubscriptionFunction<T6>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T6>;
-    // Implementation
     subscribe<Part>(
-        ...params: (string | ArraySubscriptionPredicate<string, any> | StateSubscriptionFunction<Part> | SubscribeStateOptions)[]
-    ): LitElementStateSubscription<Part> {
-        const options = subscribeOptionsFromDefaultOrParams(params, this);
-        const subscriptionFunction = params.pop() as StateSubscriptionFunction<Part>;
-        const subscription = new LitElementStateSubscription<Part>(
-            params as any,
+        path: StatePath<State>,
+        subscriptionFunction: StateSubscriptionFunction<Part>,
+        options?: SubscribeStateOptions
+    ) {
+        options = subscribeOptionsFromDefaultOrParams(options, this);
+        const subscription = new LitElementStateSubscription<State, Part>(
+            path,
             subscriptionFunction,
             this.unsubscribe.bind(this),
             options
@@ -245,7 +80,7 @@ export class LitElementStateService<State> {
         return subscription;
     }
 
-    private unsubscribe(subscription: LitElementStateSubscription<any>) {
+    private unsubscribe(subscription: LitElementStateSubscription<State, any>) {
         const subIndex = this.stateSubscriptions.indexOf(subscription);
         if (subIndex >= 0) {
             this.stateSubscriptions.splice(
@@ -260,20 +95,21 @@ export class LitElementStateService<State> {
     set<TargetedState = State>(
         statePartial: StateChange<TargetedState>,
         options?: SetStateOptions<State>
-    ): void {
+    ) {
         let stateChange = statePartial as StateChange<State>;
-        if (options?.entryPath) {
+        const entryPath = options?.entryPath as StatePathKey[];
+        if (entryPath) {
             let _statePartial = {} as any;
             let currentProperty = _statePartial;
-            for (const [index, segment] of options.entryPath.entries()) {
+            for (const [index, segment] of entryPath.entries()) {
                 if (typeof segment === 'string') {
-                    currentProperty[segment] = index < options.entryPath.length - 1 ? {} : statePartial;
+                    currentProperty[segment] = index < entryPath.length - 1 ? {} : statePartial;
                     currentProperty = currentProperty[segment];
                 } else if (typeof segment === 'number' || segment instanceof Function) {
                     currentProperty['_arrayOperation'] = {
                         op: 'update',
                         at: segment,
-                        val: index < options.entryPath.length - 1 ? {} : statePartial
+                        val: index < entryPath.length - 1 ? {} : statePartial
                     };
                     currentProperty = currentProperty['_arrayOperation']['val'];
                 }
@@ -297,7 +133,7 @@ export class LitElementStateService<State> {
         }
     };
 
-    private checkSubscriptionChange(subscription: LitElementStateSubscription<any>) {
+    private checkSubscriptionChange(subscription: LitElementStateSubscription<State, any>) {
         const newValue = this.getSubscriptionData(
             subscription.path,
             this._state
@@ -309,17 +145,24 @@ export class LitElementStateService<State> {
     }
 
     private getSubscriptionData(
-        subscriptionPath: (string | ArraySubscriptionPredicate<string, any>)[],
+        subscriptionPath: StatePath<State>,
         state: State
     ): DeepPartial<State> {
         let partial = state as object;
-        for (let [index, segment] of subscriptionPath.entries()) {
-            const isLastSegmentInPath = index === subscriptionPath.length - 1;
-            if ((typeof segment === 'object') && segment.hasOwnProperty('array')) {
-                if (Array.isArray(partial[segment.array]) && !isLastSegmentInPath)
-                    partial = partial[segment.array].find(segment.predicate);
-                else if (Array.isArray(partial[segment.array]) && isLastSegmentInPath)
-                    return partial[segment.array].find(segment.predicate);
+        for (let [index, segment] of (subscriptionPath as StatePathKey[]).entries()) {
+            const isLastSegmentInPath = index === (subscriptionPath as StatePathKey[]).length - 1;
+            if ((typeof segment === 'number') && segment.hasOwnProperty('array')) {
+                if (Array.isArray(partial) && partial[segment] && !isLastSegmentInPath)
+                    partial = partial[segment];
+                else if (Array.isArray(partial) && partial[segment] && isLastSegmentInPath)
+                    return partial[segment];
+                else
+                    return undefined;
+            }  else if (typeof segment === 'function') {
+                if (Array.isArray(partial) && !isLastSegmentInPath)
+                    partial = partial.find(segment);
+                else if (Array.isArray(partial) && isLastSegmentInPath)
+                    return partial.find(segment);
                 else
                     return undefined;
             } else if (typeof segment === 'string') {
@@ -378,10 +221,10 @@ export class LitElementStateService<State> {
                     if (typeof arrayOperation.at === 'number') {
                         (state[key] as any[]).splice(arrayOperation.at, 1);
                     } else if (arrayOperation.at instanceof Function) {
-                        let indx = (state[key] as any[]).findIndex(arrayOperation.at);
-                        while (indx >= 0) {
-                            (state[key] as any[]).splice(indx, 1);
-                            indx = (state[key] as any[]).findIndex(arrayOperation.at);
+                        let index = (state[key] as any[]).findIndex(arrayOperation.at);
+                        while (index >= 0) {
+                            (state[key] as any[]).splice(index, 1);
+                            index = (state[key] as any[]).findIndex(arrayOperation.at);
                         }
                     } else {
                         (state[key] as any[]).pop();
