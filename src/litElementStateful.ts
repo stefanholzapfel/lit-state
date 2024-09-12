@@ -18,7 +18,7 @@ export class LitElementStateful<State> extends LitElement {
         if (stateService) {
             this.stateService = stateService;
         } else if (LitElementStateService.getGlobalInstance()) {
-            this.stateService = LitElementStateService.getGlobalInstance();
+            this.stateService = LitElementStateService.getGlobalInstance<State>();
         } else {
             throw new Error('Need a LitElementState service given via constructor or a global state available.')
         }
