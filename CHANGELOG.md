@@ -66,7 +66,7 @@ LitElementStateService.subscribe(
 This makes it easier to type the path and also to reuse paths as variables.
 
 ### BREAKING CHANGE:
-This version moves the cacheHandler attribute on the ``LitElementStateful.setState`` & ``LitElementStateService.set`` methods into an options object.
+This version moves the cacheHandler parameter on the ``LitElementStateful.setState`` & ``LitElementStateService.set`` methods into a ``SetStateOptions`` object.
 When cacheHandlers have been used like e.g.:
 ```
 setSate(
