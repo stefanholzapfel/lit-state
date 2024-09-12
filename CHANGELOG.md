@@ -22,7 +22,7 @@ Starts with version 3.4.15, please see commit history for earlier changes.
 - WIP(state-path): Replace all other path definitions by StatePath
 - fix(getSubscriptionData): Fix condition for array index segments
 - fix(litElementStateful): Fix typing
-- 
+ 
 ### BREAKING CHANGE:
 This version replaces the parameter based targeting of state with an array based approach, the new ``StatePath`` interface.
 To subscribe state the function call was:
@@ -63,9 +63,10 @@ LitElementStateService.subscribe(
     ["path", "to", "my", "state"], stateChange => { ...do something with stateChange... }, { options }
 )
 ```
+This makes it easier to type the path and also to reuse paths as variables.
 
 ### BREAKING CHANGE:
-This version moves the cacheHandler attribute on the LitElementStateful.setState & LitElementStateService.set methods into an options object.
+This version moves the cacheHandler attribute on the ``LitElementStateful.setState`` & ``LitElementStateService.set`` methods into an options object.
 When cacheHandlers have been used like e.g.:
 ```
 setSate(
