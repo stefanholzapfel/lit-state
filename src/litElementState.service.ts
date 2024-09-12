@@ -55,7 +55,7 @@ export class LitElementStateService<State> {
     };
 
     static getGlobalInstance<State>() {
-        return LitElementStateService._globalInstance;
+        return LitElementStateService._globalInstance as LitElementStateService<State>;
     }
 
     subscribe<Part>(
@@ -151,7 +151,7 @@ export class LitElementStateService<State> {
         let partial = state as object;
         for (let [index, segment] of (subscriptionPath as StatePathKey[]).entries()) {
             const isLastSegmentInPath = index === (subscriptionPath as StatePathKey[]).length - 1;
-            if ((typeof segment === 'number') && segment.hasOwnProperty('array')) {
+            if (typeof segment === 'number') {
                 if (Array.isArray(partial) && partial[segment] && !isLastSegmentInPath)
                     partial = partial[segment];
                 else if (Array.isArray(partial) && partial[segment] && isLastSegmentInPath)
