@@ -85,3 +85,4 @@ setSate(
 ## [4.0.1]
 - Chore(Readme): Update Readme
 - Chore: Update version
+- Fix(typing): Reduce typing support for StatePath to 10 levels max

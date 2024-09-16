@@ -87,7 +87,7 @@ const subscription = litService.subscribe(['app', 'offline'], value => {
 ```
 
 When subscribing to LitElementStateService provide the path to the "partial" of the state to observe as a string array.
-You can go arbitrarily deep but the typing only supports 15 levels.
+You can go arbitrarily deep but the typing only supports 10 levels.
 
 As third parameter you could again override the default subscription parameters (see chapter "Initiate").
 
