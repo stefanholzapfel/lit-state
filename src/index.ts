@@ -1,10 +1,5 @@
 import {LitElementStateService} from './litElementState.service';
 
-// TODO: test autoUnsubscribe
-// TODO: test array subscription via index and predicate function
-// TODO: Change Readme
-// TODO: Add breaking change to changelog
-
 export interface StateConfig<State> {
     cache?: {
         name?: string;
