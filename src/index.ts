@@ -60,8 +60,8 @@ export type StateChange<State> =
         } & { _reducerMode?: StateReducerMode };
 
 // Helpers for StatePath type
-type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-type NextDigit = [1, 2, 3, 4, 5, 6, 7, 8 | 9, 'STOP'];
+type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+type NextDigit = [1, 2, 3, 4, 5, 6, 'STOP'];
 type Increment<Depth> = Depth extends Digit ? NextDigit[Depth] : 'STOP';
 
 export type IndexOrPredicateFunction<Type> = number | PredicateFunction<Type>;
