@@ -22,6 +22,7 @@ Starts with version 3.4.15, please see commit history for earlier changes.
 - WIP(state-path): Replace all other path definitions by StatePath
 - fix(getSubscriptionData): Fix condition for array index segments
 - fix(litElementStateful): Fix typing
+- Chore(Changelog): Add breaking changes
  
 ### 🚨 BREAKING CHANGE:
 This version replaces the parameter based targeting of state with an array based approach, the new ``StatePath`` interface.
@@ -81,3 +82,6 @@ setSate(
     { cacheHandlerName: 'myCacheHandlerName' }
 )
 ```
+## [4.0.1]
+- Chore(Readme): Update Readme
+- Chore: Update version
