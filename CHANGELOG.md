@@ -10,7 +10,7 @@ Starts with version 3.4.15, please see commit history for earlier changes.
 ## [3.4.17]
 - Chore: Upgrade lit to 3.1.1
 
-## [4]
+## [4.0.0]
 - Feat(set-state): Added options parameter with entryPath for easier state navigation
 - Feat(set-state): Correctly type and describe entryPath
 - Feat(deepReduce): Exempt "Element"
@@ -23,7 +23,7 @@ Starts with version 3.4.15, please see commit history for earlier changes.
 - fix(getSubscriptionData): Fix condition for array index segments
 - fix(litElementStateful): Fix typing
  
-### BREAKING CHANGE:
+### 🚨 BREAKING CHANGE:
 This version replaces the parameter based targeting of state with an array based approach, the new ``StatePath`` interface.
 To subscribe state the function call was:
 ```
@@ -65,7 +65,7 @@ LitElementStateService.subscribe(
 ```
 This makes it easier to type the path and also to reuse paths as variables.
 
-### BREAKING CHANGE:
+### 🚨 BREAKING CHANGE:
 This version moves the cacheHandler parameter on the ``LitElementStateful.setState`` & ``LitElementStateService.set`` methods into a ``SetStateOptions`` object.
 When cacheHandlers have been used like e.g.:
 ```
