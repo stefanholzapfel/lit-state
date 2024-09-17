@@ -89,3 +89,6 @@ setSate(
 
 ## [4.0.2]
 - Fix(typing): Reduce typing support for StatePath to 6 levels max
+
+## [4.0.3]
+- Fix(typing): Revert to recursive type with additional condition

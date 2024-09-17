@@ -59,26 +59,21 @@ export type StateChange<State> =
             State[P] | StateChange<State[P]>
         } & { _reducerMode?: StateReducerMode };
 
-// Helpers for StatePath type
-type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-type NextDigit = [1, 2, 3, 4, 5, 6, 'STOP'];
-type Increment<Depth> = Depth extends Digit ? NextDigit[Depth] : 'STOP';
-
 export type IndexOrPredicateFunction<Type> = number | PredicateFunction<Type>;
 export type StatePathKey = IndexOrPredicateFunction<any> | string;
-export type StatePath<Object, Path extends (string | IndexOrPredicateFunction<any>)[] = [], Depth = 0> = Object extends object ?
-    (Path |
-    // Check if depth > max allowed
-    (Depth extends string ?
-            // ...if yes, don't typecheck deeper levels and allow everything (for performance reasons)
-            [...Path, ...any[]] :
-            // ...otherwise check if object is array
-            (Object extends readonly any[] ?
-                // ...when array only allow index or PredicateFunction
-                StatePath<Object[number], [...Path, IndexOrPredicateFunction<Object[number]>], Increment<Depth>>
-                // ...when object generate type of all possible keys
-                : { [Key in string & keyof Object]: StatePath<Object[Key], [...Path, Key], Increment<Depth>> }[string & keyof Object])))
-    : Path;
+
+export type StatePath<Object, Path extends (string | IndexOrPredicateFunction<any>)[] = []> =
+    object extends Object
+        ? Path
+        : Object extends object
+            ? (Path |
+                    // Check if object is array
+                    (Object extends readonly any[] ?
+                        // ...when array only allow index or PredicateFunction
+                        StatePath<Object[number], [...Path, IndexOrPredicateFunction<Object[number]>]>
+                        // ...when object generate type of all possible keys
+                        : { [Key in string & keyof Object]: StatePath<Object[Key], [...Path, Key]> }[string & keyof Object]))
+            : Path;
 
 export * from './litElementStateful';
 export * from './litElementState.service';
