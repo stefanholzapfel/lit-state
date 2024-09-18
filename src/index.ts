@@ -62,17 +62,17 @@ export type StateChange<State> =
 export type IndexOrPredicateFunction<Type> = number | PredicateFunction<Type>;
 export type StatePathKey = IndexOrPredicateFunction<any> | string;
 
-export type StatePath<Object, Path extends (string | IndexOrPredicateFunction<any>)[] = []> =
-    object extends Object
+export type StatePath<Obj, Path extends (string | IndexOrPredicateFunction<any>)[] = []> =
+    object extends Required<Obj>
         ? Path
-        : Object extends object
+        : Obj extends object
             ? (Path |
                     // Check if object is array
-                    (Object extends readonly any[] ?
+                    (Obj extends readonly any[] ?
                         // ...when array only allow index or PredicateFunction
-                        StatePath<Object[number], [...Path, IndexOrPredicateFunction<Object[number]>]>
+                        StatePath<Obj[number], [...Path, IndexOrPredicateFunction<Obj[number]>]>
                         // ...when object generate type of all possible keys
-                        : { [Key in string & keyof Object]: StatePath<Object[Key], [...Path, Key]> }[string & keyof Object]))
+                        : { [Key in string & keyof Obj]: StatePath<Obj[Key], [...Path, Key]> }[string & keyof Obj]))
             : Path;
 
 export * from './litElementStateful';

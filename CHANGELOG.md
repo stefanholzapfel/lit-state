@@ -92,3 +92,6 @@ setSate(
 
 ## [4.0.3]
 - Fix(typing): Revert to recursive type with additional condition
+
+## [4.0.4]
+- Fix(typing): Make state object "Required" in StatePath
