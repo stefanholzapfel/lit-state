@@ -2,7 +2,7 @@ import {DeepPartial} from 'ts-essentials';
 import {
     CacheHandler, SetStateOptions,
     StateChange,
-    StateConfig, StatePath, StatePathKey,
+    StateConfig, StatePath, StatePathKey, StatePathType,
     StateSubscriptionFunction,
     SubscribeStateOptions
 } from './index';
@@ -58,13 +58,13 @@ export class LitElementStateService<State> {
         return LitElementStateService._globalInstance as LitElementStateService<State>;
     }
 
-    subscribe<Part>(
-        path: StatePath<State>,
-        subscriptionFunction: StateSubscriptionFunction<Part>,
+    subscribe<Path extends StatePath<State>>(
+        path: Path,
+        subscriptionFunction: StateSubscriptionFunction<StatePathType<State, Path>>,
         options?: SubscribeStateOptions
     ) {
         options = subscribeOptionsFromDefaultOrParams(options, this);
-        const subscription = new LitElementStateSubscription<State, Part>(
+        const subscription = new LitElementStateSubscription(
             path,
             subscriptionFunction,
             this.unsubscribe.bind(this),
@@ -74,7 +74,7 @@ export class LitElementStateService<State> {
             this.getSubscriptionData(
                 subscription.path,
                 this._state
-            ) as Part, true
+            ), true
         );
         this.stateSubscriptions.push(subscription);
         return subscription;
@@ -144,10 +144,10 @@ export class LitElementStateService<State> {
         }
     }
 
-    private getSubscriptionData(
-        subscriptionPath: StatePath<State>,
+    private getSubscriptionData<Path extends StatePath<State>>(
+        subscriptionPath: Path,
         state: State
-    ): DeepPartial<State> {
+    ): StatePathType<State, Path> {
         let partial = state as object;
         for (let [index, segment] of (subscriptionPath as StatePathKey[]).entries()) {
             const isLastSegmentInPath = index === (subscriptionPath as StatePathKey[]).length - 1;

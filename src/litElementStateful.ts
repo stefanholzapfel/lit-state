@@ -3,7 +3,7 @@ import {
     StateSubscriptionFunction,
     StateChange,
     SubscribeStateFromElementOptions,
-    SetStateOptions, StatePath
+    SetStateOptions, StatePath, StatePathType
 } from './index';
 import {LitElementStateService} from './litElementState.service';
 import {LitElementStateSubscription} from './litElementStateSubscription';
@@ -28,9 +28,9 @@ export class LitElementStateful<State> extends LitElement {
         return this.stateService.state;
     };
 
-    subscribeState<Part>(
-        path: StatePath<State>,
-        subscriptionFunction: StateSubscriptionFunction<Part>,
+    subscribeState<Path extends StatePath<State>, SubscribedType = StatePathType<State, Path>>(
+        path: Path,
+        subscriptionFunction: StateSubscriptionFunction<SubscribedType>,
         options?: SubscribeStateFromElementOptions
     ) {
         const subscription = this.stateService.subscribe(path, subscriptionFunction, options);
@@ -40,8 +40,8 @@ export class LitElementStateful<State> extends LitElement {
         return subscription;
     }
 
-    connectState<Part>(
-        path: StatePath<State>,
+    connectState<Path extends StatePath<State>>(
+        path: Path,
         propertyName: string,
         options?: SubscribeStateFromElementOptions
     ) {
@@ -57,7 +57,7 @@ export class LitElementStateful<State> extends LitElement {
                 throw new Error(`Property ${propertyName} not found on LitElement!`);
             }
         }
-        const subscription = this.stateService.subscribe<Part>(path, subscriptionFunction, options);
+        const subscription = this.stateService.subscribe<Path>(path, subscriptionFunction, options);
         if (options.autoUnsubscribe) {
             this.autoUnsubscribeCache.set(subscription, [path, subscriptionFunction, options]);
         }
