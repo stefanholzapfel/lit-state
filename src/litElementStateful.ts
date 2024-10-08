@@ -236,43 +236,55 @@ export class LitElementStateful<State> extends LitElement {
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<State[K1]>;
     connectState<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1])>(
-        path: [
-            K1,
-            State[K1] extends Array<any> ? IndexOrPredicateFunction<T1> : [ ]
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T1>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T1>;
-    connectState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1>(
         path: [
             K1,
-            State[K1] extends Array<any> ? IndexOrPredicateFunction<T1> : [ ],
-            K2
+            State[K1] extends Array<any> ? IndexOrPredicateFunction<T1> : K2
         ],
         subscriptionFunction: StateSubscriptionFunction<T1[K2]>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<T1[K2]>;
-    // HIER!
-
+    connectState<K1 extends keyof State,
+        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
+        K2 extends keyof T1,
+        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
+        K3 extends keyof T2>(
+        path: [
+            K1,
+            State[K1] extends Array<any> ? IndexOrPredicateFunction<T1> : K2,
+            State[K1] extends Array<any> ? K2 :
+                T1[K2] extends Array<any> ? IndexOrPredicateFunction<T2> : K3
+        ],
+        subscriptionFunction: StateSubscriptionFunction<State[K1] extends Array<any> ? T1[K2] : T2[K3]>,
+        options?: SubscribeStateOptions
+    ): LitElementStateSubscription<State[K1] extends Array<any> ? T1[K2] : T2[K3]>;
     connectState<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1,
         T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
         K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
+        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
+        K4 extends keyof T3>(
         path: [
             K1,
-            State[K1] extends Array<any> ? IndexOrPredicateFunction<T1> : [ ],
-            K2,
-            T1[K2] extends Array<any> ? IndexOrPredicateFunction<T3> : [ ],
-            K3
+            State[K1] extends Array<any> ? IndexOrPredicateFunction<T1> : K2,
+            State[K1] extends Array<any> ? K2 :
+                T1[K2] extends Array<any> ? IndexOrPredicateFunction<T2> : K3,
+            State[K1] extends Array<any> ?
+                (T1[K2] extends Array<any> ? IndexOrPredicateFunction<T2> : K3) :
+                T1[K2] extends Array<any> ? K3 :
+                    T2[K3] extends Array<any> ? IndexOrPredicateFunction<T3> : K4,
         ],
-        subscriptionFunction: StateSubscriptionFunction<T3>,
+        subscriptionFunction: StateSubscriptionFunction<
+            State[K1] extends Array<any> ?
+                (T1[K2] extends Array<any> ? IndexOrPredicateFunction<T2> : T2[K3]) :
+                T1[K2] extends Array<any> ? T2[K3] : T3[K4]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T3>;
+    ): LitElementStateSubscription<
+        State[K1] extends Array<any> ?
+            (T1[K2] extends Array<any> ? IndexOrPredicateFunction<T2> : T2[K3]) :
+            T1[K2] extends Array<any> ? T2[K3] : T3[K4]>;
     /*
 connectState<K1 extends keyof State,
     T1 extends (State[K1] extends (infer E)[] ? E : State[K1]),

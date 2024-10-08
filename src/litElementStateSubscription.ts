@@ -40,7 +40,9 @@ export class LitElementStateSubscription<SubscribedType> {
                 {
                     previous: this.previousValue,
                     current: this.subscriptionOptions.getDeepCopy ?
-                        this.valueDeepCopy : this.value
+                        // We need to deepcopy again because we need to avoid that the user can edit the supscription's deep copy (it's needed for nested change comparisons)
+                        deepCopy(value)
+                            : this.value
                 }
             );
         }
