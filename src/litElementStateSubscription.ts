@@ -6,21 +6,23 @@ import {
 } from './index';
 import {deepCopy} from './litElementState.helpers';
 
-export class LitElementStateSubscription<State, SubscribedType> {
+export class LitElementStateSubscription<SubscribedType> {
     previousValue: SubscribedType = null;
     value: SubscribedType = null;
     valueDeepCopy: SubscribedType = null;
-    path: StatePath<State>;
+    path: StatePath<any>;
     closed = false;
-
+    
     private subscriptionFunction;
-    private unsubscribeFunction: (subscription: LitElementStateSubscription<State, SubscribedType>) => void;
+    private unsubscribeFunction: (subscription: LitElementStateSubscription<SubscribedType>) => void;
     subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
-
+    
     constructor(
-        path: StatePath<State>,
+        path: StatePath<any>,
         subscriptionFunction: StateSubscriptionFunction<SubscribedType>,
-        unsubscriptionFunction: (subscription: LitElementStateSubscription<State, SubscribedType>) => void,
+        unsubscriptionFunction: (
+            subscription: LitElementStateSubscription<any>
+        ) => void,
         subscriptionOptions?: SubscribeStateOptions
     ) {
         this.path = path;
@@ -40,7 +42,7 @@ export class LitElementStateSubscription<State, SubscribedType> {
                     current: this.subscriptionOptions.getDeepCopy ?
                         // We need to deepcopy again because we need to avoid that the user can edit the subscription's deep copy (it's needed for nested change comparisons)
                         deepCopy(value)
-                        : this.value
+                            : this.value
                 }
             );
         }

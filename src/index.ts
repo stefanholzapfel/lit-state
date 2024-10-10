@@ -27,12 +27,21 @@ export interface Change<P> {
 export type StateReducerMode = 'merge' | 'replace';
 
 export type PredicateFunction<ArrayType> = (array: ArrayType, index?: number) => boolean;
+export type IndexOrPredicateFunction<Type> = number | PredicateFunction<Type>;
+export type ArrayElementSelector<ArrayName, ElementType> = { array: ArrayName, get: IndexOrPredicateFunction<ElementType> };
 
-export interface SubscribeStateOptions {
+export interface GetStateOptions {
+    getDeepCopy?: boolean;
+}
+
+export interface SubscribeStateOptions extends GetStateOptions {
     getInitialValue?: boolean;
     // Set true to trigger changes when a sub-property of a subscribed property changes
     pushNestedChanges?: boolean;
-    getDeepCopy?: boolean;
+}
+
+export interface SubscribeStateFromElementOptions extends SubscribeStateOptions {
+    autoUnsubscribe?: boolean;
 }
 
 export interface SetStateOptions<State> {
@@ -41,17 +50,13 @@ export interface SetStateOptions<State> {
     entryPath?: StatePath<State>;
 }
 
-export interface SubscribeStateFromElementOptions extends SubscribeStateOptions {
-    autoUnsubscribe?: boolean;
-}
-
 export type StateChange<State> =
     State extends Array<any> ?
         {
             _arrayOperation:
-                { op: 'update', at: PredicateFunction<State[number]> | number, val: StateChange<State[number]> | ((element: State[number]) => StateChange<State[number]>) } |
+                { op: 'update', at: IndexOrPredicateFunction<State[number]>, val: StateChange<State[number]> | ((element: State[number]) => StateChange<State[number]>) } |
                 { op: 'push', at?: number, val: State[number] } |
-                { op: 'pull', at?: PredicateFunction<State[number]> | number }
+                { op: 'pull', at?: IndexOrPredicateFunction<State[number]> }
         } |
         State :
         {
@@ -59,21 +64,8 @@ export type StateChange<State> =
             State[P] | StateChange<State[P]>
         } & { _reducerMode?: StateReducerMode };
 
-export type IndexOrPredicateFunction<Type> = number | PredicateFunction<Type>;
-export type StatePathKey = IndexOrPredicateFunction<any> | string;
-
-export type StatePath<Obj, Path extends (string | IndexOrPredicateFunction<any>)[] = []> =
-    object extends Required<Obj>
-        ? Path
-        : Obj extends object
-            ? (Path |
-                    // Check if object is array
-                    (Obj extends readonly any[] ?
-                        // ...when array only allow index or PredicateFunction
-                        StatePath<Obj[number], [...Path, IndexOrPredicateFunction<Obj[number]>]>
-                        // ...when object generate type of all possible keys
-                        : { [Key in string & keyof Obj]: StatePath<Obj[Key], [...Path, Key]> }[string & keyof Obj]))
-            : Path;
+// TODO: Properly type that so StatePath correlates with the generic inputs of the subscription & get overloads
+export type StatePath<State> = readonly (string | ArrayElementSelector<string, any>)[];
 
 export * from './litElementStateful';
 export * from './litElementState.service';

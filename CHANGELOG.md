@@ -95,3 +95,19 @@ setSate(
 
 ## [4.0.4]
 - Fix(typing): Make state object "Required" in StatePath
+
+## [5.0.0] 
+🚨🚨: I strongly recommend not using v4 and upgrade to this version
+- Fix(StatePath): Change to non-recursive typing, revert array element selection
+
+### 🚨 BREAKING CHANGE:
+Since recursive typing proved to be super slow for large states and impossible to properly use intellisense, 
+I had to revert to multiple function overloads.
+As a consequence the StatePath array element selection had to be changed / reverted:
+```
+['library', 'books', 1] or ['library', 'books', book => book.title === 'Harry Potter']
+```
+Needs to be reverted to that:
+```
+['library', { array: 'books', get: 1}] or ['library', { array: 'books', get: book => book.title === 'Harry Potter'}]
+```

@@ -244,24 +244,33 @@ Same as using directly, just use the method ```this.setState()``` on your elemen
 Since it is cumbersome to subscribe / mutate array elements, we have array operators.
 
 <h2> Subscribing array elements </h2>
-To subscribe to a specific element in an array, you can provide a predicate function or a numeric index. For the function, the subscription will use the
-first element where it returns true. The syntax for the predicate function is:
+To subscribe to a specific element in an array, you can provide a predicate function or a numeric index as part of the 
+```ArrayElementSelector``` interface:
+
+```
+type ArrayElementSelector<ArrayName, ElementType> = { array: ArrayName, get: IndexOrPredicateFunction<ElementType> };
+```
+
+The syntax for the predicate function is:
 
 ```
  type PredicateFunction<ArrayType> = (array: ArrayType, index?: number) => boolean;
 ```
 
-Example with predicate function:
+For the function, the subscription will use the first element where it returns true.
+
+Example with predicate function (takes the fist book with author named "Me" or the element at index 10 from the data
+aray - whatever comes first):
 ```
-this.subscribeState(['books', 'data', predicate: (book, index) => book.author === 'Me' || index === 10 ], value => {
+this.subscribeState(['books', { array: 'data', get: (book, index) => book.author === 'Me' || index === 10 } ], value => {
     value.previous // the value before change
     value.current // the new value
 })
 ```
 
-Example with numeric index:
+Example with numeric index (takes the element at index 10 of the "data" array):
 ```
-this.subscribeState(['books', 'data', 10], value => {
+this.subscribeState(['books', { array: 'data', get: 10 }], value => {
     value.previous // the value before change
     value.current // the new value
 })
@@ -276,9 +285,9 @@ In your state changes you can also use this syntax to update, push or pull (remo
 ```
 {
     _arrayOperation:
-        { op: 'update', at: PredicateFunction<State[number]> | number, val: StateChange<State[number]> | ((element: State[number]) => StateChange<State[number]>) } |
+        { op: 'update', at: IndexOrPredicateFunction<State[number]> | number, val: StateChange<State[number]> | ((element: State[number]) => StateChange<State[number]>) } |
         { op: 'push', at?: number, val: State[number] } |
-        { op: 'pull', at?: PredicateFunction<State[number]> | number }
+        { op: 'pull', at?: IndexOrPredicateFunction<State[number]> | number }
 }
 ```
 
