@@ -1,6 +1,6 @@
 import {DeepPartial} from 'ts-essentials';
 import {
-    ArraySubscriptionPredicate,
+    ElementSelector,
     CacheHandler, SetStateOptions,
     StateChange,
     StateConfig,
@@ -59,17 +59,16 @@ export class LitElementStateService<State> {
         return LitElementStateService._globalInstance;
     }
 
-    // TODO: Replace with EntryPath for v5
     // Overloads
     subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1])>(
-        path: [ State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1 ],
+        T1 extends State[K1]>(
+        path: [ State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1 ],
         subscriptionFunction: StateSubscriptionFunction<T1>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<T1>;
     subscribe<K1 extends keyof State,
         T1 extends State[K1]>(
-        k1: K1,
+        path: [ K1 ],
         subscriptionFunction: StateSubscriptionFunction<T1>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<T1>;
@@ -78,8 +77,8 @@ export class LitElementStateService<State> {
         K2 extends keyof T1,
         T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2])>(
         path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2
         ],
         subscriptionFunction: StateSubscriptionFunction<T2>,
         options?: SubscribeStateOptions
@@ -87,14 +86,14 @@ export class LitElementStateService<State> {
     subscribe<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1,
-        T2 extends T1[K2]>(
+        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2])>(
         path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
             K2
         ],
-        subscriptionFunction: StateSubscriptionFunction<T2>,
+        subscriptionFunction: StateSubscriptionFunction<T1[K2]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T2>;
+    ): LitElementStateSubscription<T1[K2]>;
     subscribe<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1,
@@ -102,9 +101,9 @@ export class LitElementStateService<State> {
         K3 extends keyof T2,
         T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
         path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2,
+            T2[K3] extends Array<any> ? ElementSelector<K3, T3> : K3
         ],
         subscriptionFunction: StateSubscriptionFunction<T3>,
         options?: SubscribeStateOptions
@@ -114,15 +113,15 @@ export class LitElementStateService<State> {
         K2 extends keyof T1,
         T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
         K3 extends keyof T2,
-        T3 extends T2[K3]>(
+        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
         path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2,
             K3
         ],
-        subscriptionFunction: StateSubscriptionFunction<T3>,
+        subscriptionFunction: StateSubscriptionFunction<T2[K3]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T3>;
+    ): LitElementStateSubscription<T2[K3]>;
     subscribe<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1,
@@ -132,10 +131,10 @@ export class LitElementStateService<State> {
         K4 extends keyof T3,
         T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4])>(
         path:  [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2,
+            T2[K3] extends Array<any> ? ElementSelector<K3, T3> : K3,
+            T3[K4] extends Array<any> ? ElementSelector<K4, T4> : K4
         ],
         subscriptionFunction: StateSubscriptionFunction<T4>,
         options?: SubscribeStateOptions
@@ -147,16 +146,16 @@ export class LitElementStateService<State> {
         K3 extends keyof T2,
         T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
         K4 extends keyof T3,
-        T4 extends T3[K4]>(
-        path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
+        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4])>(
+        path:  [
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2,
+            T2[K3] extends Array<any> ? ElementSelector<K3, T3> : K3,
             K4
         ],
-        subscriptionFunction: StateSubscriptionFunction<T4>,
+        subscriptionFunction: StateSubscriptionFunction<T3[K4]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T4>;
+    ): LitElementStateSubscription<T3[K4]>;
     subscribe<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1,
@@ -168,11 +167,11 @@ export class LitElementStateService<State> {
         K5 extends keyof T4,
         T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5])>(
         path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2,
+            T2[K3] extends Array<any> ? ElementSelector<K3, T3> : K3,
+            T3[K4] extends Array<any> ? ElementSelector<K4, T4> : K4,
+            T4[K5] extends Array<any> ? ElementSelector<K5, T5> : K5
         ],
         subscriptionFunction: StateSubscriptionFunction<T5>,
         options?: SubscribeStateOptions
@@ -186,17 +185,17 @@ export class LitElementStateService<State> {
         K4 extends keyof T3,
         T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
         K5 extends keyof T4,
-        T5 extends T4[K5]>(
+        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5])>(
         path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2,
+            T2[K3] extends Array<any> ? ElementSelector<K3, T3> : K3,
+            T3[K4] extends Array<any> ? ElementSelector<K4, T4> : K4,
             K5
         ],
-        subscriptionFunction: StateSubscriptionFunction<T5>,
+        subscriptionFunction: StateSubscriptionFunction<T4[K5]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T5>;
+    ): LitElementStateSubscription<T4[K5]>;
     subscribe<K1 extends keyof State,
         T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
         K2 extends keyof T1,
@@ -210,12 +209,12 @@ export class LitElementStateService<State> {
         K6 extends keyof T5,
         T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6])>(
         path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5,
-            T5[K6] extends Array<any> ? ArraySubscriptionPredicate<K6, T6> : K6
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2,
+            T2[K3] extends Array<any> ? ElementSelector<K3, T3> : K3,
+            T3[K4] extends Array<any> ? ElementSelector<K4, T4> : K4,
+            T4[K5] extends Array<any> ? ElementSelector<K5, T5> : K5,
+            T5[K6] extends Array<any> ? ElementSelector<K6, T6> : K6
         ],
         subscriptionFunction: StateSubscriptionFunction<T6>,
         options?: SubscribeStateOptions
@@ -231,37 +230,36 @@ export class LitElementStateService<State> {
         K5 extends keyof T4,
         T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
         K6 extends keyof T5,
-        T6 extends T5[K6]>(
+        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6])>(
         path: [
-            State[K1] extends Array<any> ? ArraySubscriptionPredicate<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArraySubscriptionPredicate<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArraySubscriptionPredicate<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArraySubscriptionPredicate<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArraySubscriptionPredicate<K5, T5> : K5,
+            State[K1] extends Array<any> ? ElementSelector<K1, T1> : K1,
+            T1[K2] extends Array<any> ? ElementSelector<K2, T2> : K2,
+            T2[K3] extends Array<any> ? ElementSelector<K3, T3> : K3,
+            T3[K4] extends Array<any> ? ElementSelector<K4, T4> : K4,
+            T4[K5] extends Array<any> ? ElementSelector<K5, T5> : K5,
             K6
         ],
-        subscriptionFunction: StateSubscriptionFunction<T6>,
+        subscriptionFunction: StateSubscriptionFunction<T5[K6]>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T6>;
+    ): LitElementStateSubscription<T5[K6]>;
     // Implementation
     subscribe<Part>(
-        path: (string | ArraySubscriptionPredicate<string, any>)[],
+        path: (string | ElementSelector<string, any>)[],
         subscriptionFunction: StateSubscriptionFunction<Part>,
-        options?: SubscribeStateFromElementOptions
+        options?: SubscribeStateOptions
     ): LitElementStateSubscription<Part> {
-        const _options = subscribeOptionsFromDefaultOrParams([...path, subscriptionFunction, options], this);
-        const _subscriptionFunction = [...path, subscriptionFunction, options].pop() as StateSubscriptionFunction<Part>;
+        options = subscribeOptionsFromDefaultOrParams(options, this);
         const subscription = new LitElementStateSubscription<Part>(
-            [...path, subscriptionFunction, options] as any,
-            _subscriptionFunction,
+            path,
+            subscriptionFunction,
             this.unsubscribe.bind(this),
-            _options
+            options
         );
         subscription.next(
             this.getSubscriptionData(
                 subscription.path,
                 this._state
-            ) as Part, true
+            ), true
         );
         this.stateSubscriptions.push(subscription);
         return subscription;
@@ -331,7 +329,7 @@ export class LitElementStateService<State> {
     }
 
     private getSubscriptionData(
-        subscriptionPath: (string | ArraySubscriptionPredicate<string, any>)[],
+        subscriptionPath: (string | ElementSelector<string, any>)[],
         state: State
     ): DeepPartial<State> {
         let partial = state as object;
@@ -339,9 +337,9 @@ export class LitElementStateService<State> {
             const isLastSegmentInPath = index === subscriptionPath.length - 1;
             if ((typeof segment === 'object') && segment.hasOwnProperty('array')) {
                 if (Array.isArray(partial[segment.array]) && !isLastSegmentInPath)
-                    partial = partial[segment.array].find(segment.predicate);
+                    partial = partial[segment.array].find(segment.get);
                 else if (Array.isArray(partial[segment.array]) && isLastSegmentInPath)
-                    return partial[segment.array].find(segment.predicate);
+                    return partial[segment.array].find(segment.get);
                 else
                     return undefined;
             } else if (typeof segment === 'string') {

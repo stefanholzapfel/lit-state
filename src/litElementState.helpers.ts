@@ -90,20 +90,11 @@ export const deepCompare = (one, two): boolean =>  {
     }
 }
 
-export const subscribeOptionsFromDefaultOrParams = (params: any[], service: LitElementStateService<any>): SubscribeStateFromElementOptions => {
-    let options = service.config.defaultSubscribeOptions;
-    if (
-        params[params.length - 1].hasOwnProperty('getInitialValue') ||
-        params[params.length - 1].hasOwnProperty('pushNestedChanges') ||
-        params[params.length - 1].hasOwnProperty('getDeepCopy') ||
-        params[params.length - 1].hasOwnProperty('autoUnsubscribe')
-    ) {
-        options = {
-            ...options,
-            ...params.pop() as SubscribeStateFromElementOptions
-        }
+export const subscribeOptionsFromDefaultOrParams = (options: SubscribeStateFromElementOptions, service: LitElementStateService<any>): SubscribeStateFromElementOptions => {
+    return {
+        ...service.config.defaultSubscribeOptions,
+        ...options ?? {}
     }
-    return options;
 }
 
 // Checks if an object shouldn't be deep reduced but rather replaced. These types are also excluded from caching and deepCompare

@@ -1,5 +1,5 @@
 import {
-    ArraySubscriptionPredicate,
+    ElementSelector,
     StateSubscriptionFunction,
     SubscribeStateFromElementOptions,
     SubscribeStateOptions
@@ -10,7 +10,7 @@ export class LitElementStateSubscription<SubscribedType> {
     previousValue: SubscribedType = null;
     value: SubscribedType = null;
     valueDeepCopy: SubscribedType = null;
-    path: (string | ArraySubscriptionPredicate<string, any>)[];
+    path: (string | ElementSelector<string, any>)[];
     closed = false;
     
     private subscriptionFunction;
@@ -18,7 +18,7 @@ export class LitElementStateSubscription<SubscribedType> {
     subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
     
     constructor(
-        path: (string | ArraySubscriptionPredicate<string, any>)[],
+        path: (string | ElementSelector<string, any>)[],
         subscriptionFunction: StateSubscriptionFunction<SubscribedType>,
         unsubscriptionFunction: (
             subscription: LitElementStateSubscription<any>
@@ -40,7 +40,7 @@ export class LitElementStateSubscription<SubscribedType> {
                 {
                     previous: this.previousValue,
                     current: this.subscriptionOptions.getDeepCopy ?
-                        // We need to deepcopy again because we need to avoid that the user can edit the supscription's deep copy (it's needed for nested change comparisons)
+                        // We need to deepcopy again because we need to avoid that the user can edit the subscription's deep copy (it's needed for nested change comparisons)
                         deepCopy(value)
                             : this.value
                 }
