@@ -1,5 +1,5 @@
 import {
-    ElementSelector,
+    StatePath,
     StateSubscriptionFunction,
     SubscribeStateFromElementOptions,
     SubscribeStateOptions
@@ -10,7 +10,7 @@ export class LitElementStateSubscription<SubscribedType> {
     previousValue: SubscribedType = null;
     value: SubscribedType = null;
     valueDeepCopy: SubscribedType = null;
-    path: (string | ElementSelector<string, any>)[];
+    path: StatePath<any>;
     closed = false;
     
     private subscriptionFunction;
@@ -18,7 +18,7 @@ export class LitElementStateSubscription<SubscribedType> {
     subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
     
     constructor(
-        path: (string | ElementSelector<string, any>)[],
+        path: StatePath<any>,
         subscriptionFunction: StateSubscriptionFunction<SubscribedType>,
         unsubscriptionFunction: (
             subscription: LitElementStateSubscription<any>
