@@ -11,7 +11,7 @@ import {LitElementStateSubscription} from './litElementStateSubscription';
 import {subscribeOptionsFromDefaultOrParams} from "./litElementState.helpers";
 
 export class LitElementStateful<State> extends LitElement {
-    private autoUnsubscribeCache: Map<LitElementStateSubscription<any>, any> = new Map();
+    private autoUnsubscribeCache: Map<LitElementStateSubscription<any>, any[]> = new Map();
     private stateService: LitElementStateService<State>;
 
     constructor(stateService?: LitElementStateService<State>) {
@@ -443,7 +443,7 @@ export class LitElementStateful<State> extends LitElement {
         super.connectedCallback();
         this.autoUnsubscribeCache.forEach((params, subscription) => {
             if (subscription.closed) {
-                const newSubscription = this.stateService.subscribe.apply(this.stateService, params);
+                const newSubscription = this.stateService.subscribe.apply(this.stateService, [params[0], params[1], params[2]]);
                 this.autoUnsubscribeCache.set(newSubscription, params);
                 this.autoUnsubscribeCache.delete(subscription);
             }

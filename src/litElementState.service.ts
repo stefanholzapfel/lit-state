@@ -641,11 +641,15 @@ export class LitElementStateService<State> {
         let partial = state as object;
         for (let [index, segment] of subscriptionPath.entries()) {
             const isLastSegmentInPath = index === subscriptionPath.length - 1;
-            if ((typeof segment === 'object') && segment.hasOwnProperty('array')) {
+            if ((typeof segment === 'object') && segment.hasOwnProperty('array') && segment.hasOwnProperty('get')) {
                 if (Array.isArray(partial[segment.array]) && !isLastSegmentInPath)
-                    partial = partial[segment.array].find(segment.get);
+                    typeof segment['get'] === 'number'?
+                        partial = partial[segment.array][segment.get] :
+                        partial = partial[segment.array].find(segment.get);
                 else if (Array.isArray(partial[segment.array]) && isLastSegmentInPath)
-                    return partial[segment.array].find(segment.get);
+                    return typeof segment['get'] === 'number' ?
+                        partial[segment.array][segment.get] :
+                        partial[segment.array].find(segment.get);
                 else
                     return undefined;
             } else if (typeof segment === 'string') {
@@ -655,7 +659,8 @@ export class LitElementStateService<State> {
                     return partial[segment];
                 else
                     return undefined;
-            }
+            } else
+                return undefined;
         }
     }
 
