@@ -15,8 +15,8 @@ export interface CacheHandler<State> {
     load(stateServiceInstance: LitElementStateService<State>): StateChange<State>;
 }
 
-export type StateSubscriptionFunction<P> = (
-    value: Change<P>
+export type StateSubscriptionFunction<StatePart> = (
+    value: Change<StatePart>
 ) => void;
 
 export interface Change<P> {

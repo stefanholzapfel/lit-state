@@ -3,9 +3,7 @@ A lightweight reactive state management for Lit
 
 <h1>Installation</h1>
 
-```
-npm install @stefanholzapfel/lit-state
-```
+`npm install @stefanholzapfel/lit-state`
 
 <h1>Initiate</h1>
 
@@ -82,22 +80,19 @@ Use the state via a reference:
 ```
 litService.state() // Returns the whole State object
 
-const subscription = litService.subscribe('app', 'offline', value => {
+const subscription = litService.subscribe(['app', 'offline'], value => {
     value.previous // the value before change
     value.current // the new value
 }) 
 ```
 
-When subscribing to LitElementStateService, provide the path to the "partial" of the state to observe.
-One string param per nested property. The depth of the "subscription path" for now is limited to six, since I didn't find another way to type the mehtod than overriding the function 
-multiple times (suggestions for improvement very welcome!).
+When subscribing to LitElementStateService provide the path to the "partial" of the state to observe as a string array.
+You can go arbitrarily deep but the typing only supports 6 levels.
 
-As third param you could again override the default subscription params (see chapter "Initiate").
+As third parameter you could again override the default subscription parameters (see chapter "Initiate").
 
-Don't forget to unsubscribe when you dont wan't to listen for state changes anymore, or you get memory leaks:
-```
-subscription.unsubscribe();
-```
+Don't forget to unsubscribe when you don't want to listen for state changes anymore, or you get memory leaks:
+`subscription.unsubscribe();`
 
 ## 2. In lit-element
 lit-state comes with a class that extends LitElement. You can create your lit-element like this:
@@ -110,7 +105,7 @@ export class MyComponent extends LitElementStateful<State> {
 ```
 Then you can provide a reference to a LitElementStateService in the constructor.
 If you have created a global LitElementStateService, you don't have to provide any service
-since lit-state will automatically take that one (but you still can if you like).
+since lit-state will automatically pick that one (but you still can if you like).
 
 ```
 export class MyComponent extends LitElementStateful<State> {
@@ -119,25 +114,25 @@ export class MyComponent extends LitElementStateful<State> {
     
     constructor() {
         super();
-        this.subscribeState('app', 'mobile', value => {
+        this.subscribeState(['app', 'mobile'], value => {
             value.previous // the value before change
             value.current // the new value
             this.mobile = value.current;
         })
-        this.connectState('app', 'mobile', 'mobile');
+        this.connectState(['app', 'mobile'], 'mobile');
     }
 }
 ```
 
 As you see in the example above you now have two ways to subscribe the state: 
 
-```this.subscribeState()``` works the same as when using litService.subscribe directly
+`this.subscribeState()` works the same as when using litService.subscribe directly
 
-```this.connectState()``` will automatically connect the state partial defined to the lit-element's 
-property in the last string parameter. The property to connect to must be a @property / @state in your lit-element.
-requestUpdate() will automatically be called on every change and un-subscription also happens automatically when the component is disconnected.
+`this.connectState()` will automatically connect the state partial defined to the lit-element's 
+property in the second parameter. The property to connect to must be a `@property` / `@state` in your lit-element.
+`requestUpdate()` will automatically be called on every change and un-subscription is also handled automatically when the component is disconnected.
 
-Now just use the e.g. ```@state() mobile``` in your element as you would normally do.
+Now just use the e.g. `@state() mobile` in your element as you would normally do.
 
 
 <h1> Manipulate state </h1>
@@ -237,37 +232,43 @@ stateService.set(0, { entryPath: ['books', 'bookCount'] })
 
 It's a matter of taste if / when to use this array notation for navigating to the entry point, but some users might find it more elegant.
 
-**Hint**: You can use a PredicateFunction or the index for array navigation in your entry path (see section "Array operations")
+**Hint**: You can use a PredicateFunction or a numeric index for array navigation in your entry path (see section "**Array operations**")
 
 
 <h2> 2. In lit-element </h2>
 
-Same as using directly, just use the method ```this.setState()``` instead.
+Same as using directly, just use the method ```this.setState()``` on your element instead.
 
 <h1>Array operations</h1>
 
 Since it is cumbersome to subscribe / mutate array elements, we have array operators.
 
 <h2> Subscribing array elements </h2>
-To subscribe to a specific element in an array, you can provide a predicate function. The subscription will use the
-first element for which the function returns true. The syntax is:
+To subscribe to a specific element in an array, you can provide a predicate function or a numeric index. For the function, the subscription will use the
+first element where it returns true. The syntax for the predicate function is:
 
 ```
- type ArraySubscriptionPredicate<ArrayName, ElementType> = { array: ArrayName, predicate: PredicateFunction<ElementType> };
  type PredicateFunction<ArrayType> = (array: ArrayType, index?: number) => boolean;
 ```
 
-Example:
+Example with predicate function:
 ```
-this.subscribeState('books', { array: 'data', predicate: (book, index) => book.author === 'Me' || index === 10  }, value => {
+this.subscribeState(['books', 'data', predicate: (book, index) => book.author === 'Me' || index === 10 ], value => {
     value.previous // the value before change
     value.current // the new value
 })
 ```
 
-**Hint**: You can use array predicate function multiple times in the path (subscribe to elements in nested arrays). If you
-provide a string instead of the predicate object on an array, you will subscribe to the whole array. When you subscribe to
-an array as a whole, this is the last segment in the path.
+Example with numeric index:
+```
+this.subscribeState(['books', 'data', 10], value => {
+    value.previous // the value before change
+    value.current // the new value
+})
+```
+
+**Hint**: You can perform multiple array searches in the path (subscribe to elements in nested arrays). If you
+don't provide a predicate function or numeric index you will subscribe to the whole array. In this case it is the last segment in the path.
 
 <h2> Manipulating array elements </h2>
 In your state changes you can also use this syntax to update, push or pull (remove) array elements:

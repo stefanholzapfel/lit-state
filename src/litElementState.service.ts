@@ -582,7 +582,7 @@ export class LitElementStateService<State> {
     set<TargetedState = State>(
         statePartial: StateChange<TargetedState>,
         options?: SetStateOptions<State>
-    ): void {
+    ) {
         let stateChange = statePartial as StateChange<State>;
         if (options?.entryPath) {
             let _statePartial = {} as any;
@@ -704,10 +704,10 @@ export class LitElementStateService<State> {
                     if (typeof arrayOperation.at === 'number') {
                         (state[key] as any[]).splice(arrayOperation.at, 1);
                     } else if (arrayOperation.at instanceof Function) {
-                        let indx = (state[key] as any[]).findIndex(arrayOperation.at);
-                        while (indx >= 0) {
-                            (state[key] as any[]).splice(indx, 1);
-                            indx = (state[key] as any[]).findIndex(arrayOperation.at);
+                        let index = (state[key] as any[]).findIndex(arrayOperation.at);
+                        while (index >= 0) {
+                            (state[key] as any[]).splice(index, 1);
+                            index = (state[key] as any[]).findIndex(arrayOperation.at);
                         }
                     } else {
                         (state[key] as any[]).pop();

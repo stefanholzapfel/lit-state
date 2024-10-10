@@ -1,10 +1,10 @@
 import {LitElementStateService, SubscribeStateFromElementOptions} from './index';
 
-export const isObject = (item) =>  {
+export const isObject = (item) => {
     return (item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Map) && !(item instanceof Set));
 }
 
-export const deepCopy = (obj) =>  {
+export const deepCopy = (obj) => {
     let copy;
 
     // Handle the 3 simple types, null, undefined and Promises
@@ -52,7 +52,7 @@ export const deepCopy = (obj) =>  {
     throw new Error('Unable to copy obj! Its type isn\'t supported.');
 }
 
-export const deepCompare = (one, two): boolean =>  {
+export const deepCompare = (one, two): boolean => {
     if (one === null || typeof one !== 'object' || isExceptionFromDeepReduce(one)) {
         return one === two;
     }
