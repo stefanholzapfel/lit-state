@@ -244,8 +244,7 @@ Same as using directly, just use the method ```this.setState()``` on your elemen
 Since it is cumbersome to subscribe / mutate array elements, we have array operators.
 
 <h2> Subscribing array elements </h2>
-To subscribe to a specific element in an array, you can provide a predicate function or a numeric index as part of the 
-```ArrayElementSelector``` interface:
+To subscribe to a specific element in an array, you can provide a predicate function or a numeric index as part of the ArrayElementSelector interface:
 
 ```
 type ArrayElementSelector<ArrayName, ElementType> = { array: ArrayName, get: IndexOrPredicateFunction<ElementType> };
