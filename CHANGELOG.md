@@ -96,9 +96,10 @@ setSate(
 ## [4.0.4]
 - Fix(typing): Make state object "Required" in StatePath
 
-## [5.0.0] 
-🚨🚨: I strongly recommend not using v4 and upgrade to this version
+## [5.0.0]
 - Fix(StatePath): Change to non-recursive typing, revert array element selection
+
+### 🚨🚨: I strongly recommend not using v4 and upgrade to this version
 
 ### 🚨 BREAKING CHANGE:
 Since recursive typing proved to be super slow for large states and impossible to properly use intellisense, 
@@ -111,3 +112,6 @@ Needs to be reverted to that:
 ```
 ['library', { array: 'books', get: 1}] or ['library', { array: 'books', get: book => book.title === 'Harry Potter'}]
 ```
+
+## [5.0.1]
+- Fix(deep-reduce): Add Date to exceptions from deepReduce
