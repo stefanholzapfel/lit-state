@@ -115,3 +115,7 @@ Needs to be reverted to that:
 
 ## [5.0.1]
 - Fix(deep-reduce): Add Date to exceptions from deepReduce
+
+## [5.0.2]
+- fix(cacheHandlers): Improve array handling for localstorage cacheHandler
+- fix(cacheHandlers): Fix typing error in localstorage cacheHandler

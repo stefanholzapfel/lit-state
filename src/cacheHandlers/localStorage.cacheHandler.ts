@@ -49,7 +49,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
 
     set(change: StateChange<State>, options: SetStateOptions<State>, stateServiceInstance: LitElementStateService<State>) {
          // TODO: Check if entrypath has Array Selectors (won't work!)
-        const path = [ LOCALSTORAGE_PREFIX, ...options?.entryPath ];
+        const path = [ LOCALSTORAGE_PREFIX, ...options?.entryPath as string[] ];
         if (!!stateServiceInstance?.config?.cache?.name) {
             path.push(stateServiceInstance.config.cache.name);
         }
