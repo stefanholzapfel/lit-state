@@ -47,23 +47,24 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         });
     };
 
-    set(change: StateChange<State>, options: SetStateOptions<State>, stateServiceInstance: LitElementStateService<State>) {
-         // TODO: Check if entrypath has Array Selectors (won't work!)
-        const path = [ LOCALSTORAGE_PREFIX, ...(options?.entryPath as string[]) ?? [] ];
+    set(change: StateChange<State>, stateServiceInstance: LitElementStateService<State>) {
+        let prependedCount = 1;
+        const path = [ LOCALSTORAGE_PREFIX ];
         if (!!stateServiceInstance?.config?.cache?.name) {
             path.push(stateServiceInstance.config.cache.name);
+            prependedCount++;
         }
-        this.setRecursive(change, path, stateServiceInstance);
+        this.setRecursive(change, path, stateServiceInstance, prependedCount);
     }
 
-    private setRecursive(change: StateChange<State>, path: string[], stateServiceInstance: LitElementStateService<State>) {
+    private setRecursive(change: StateChange<State>, path: string[], stateServiceInstance: LitElementStateService<State>, prependedCount: number) {
         for (const key in change as any) {
             const fullPath = [ ...path, key ];
             const pathString = fullPath.join('.');
             if (!isExceptionFromDeepReduce(change[key])) {
                 if (isObject(change[key])) {
                     if ('_arrayOperation' in change[key] || Array.isArray(change[key])) {
-                        let newArray = stateServiceInstance.get(path as any);
+                        let newArray = stateServiceInstance.get(path.slice(prependedCount) as any);
                         localStorage.setItem(pathString, JSON.stringify({ v: newArray, t: 'array' }));
                         if (!this.localStorageKeys.has(pathString)) this.localStorageKeys.add(pathString);
                     } else {
@@ -72,7 +73,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                             delete change[key]._reducerMode;
                         }
                         const newPart = { ...change[key] };
-                        this.setRecursive(newPart, fullPath, stateServiceInstance);
+                        this.setRecursive(newPart, fullPath, stateServiceInstance, prependedCount);
                     }
                 } else {
                     if (change[key] === null || change[key] === undefined) {

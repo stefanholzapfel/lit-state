@@ -615,7 +615,7 @@ export class LitElementStateService<State> {
             if (!cacheHandler) {
                 console.error(`lit-state: A cache handler with name ${options.cacheHandlerName} was not registered! This set call will not be persisted!`)
             } else {
-                cacheHandler.set(stateChange, options, this);
+                cacheHandler.set(stateChange, this);
             }
         }
         for (const subscription of this.stateSubscriptions) {

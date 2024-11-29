@@ -122,3 +122,9 @@ Needs to be reverted to that:
 
 ## [5.0.3]
 - fix(cacheHandlers): Fix array merge error in localstorage cacheHandler
+
+## [5.0.4]
+- fix(cacheHandlers): Fix path creation in localstorage cacheHandler
+
+## [5.0.5]
+- fix(cacheHandlers): Fix path creation in localstorage cacheHandler

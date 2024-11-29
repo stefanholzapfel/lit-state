@@ -11,7 +11,7 @@ export interface StateConfig<State> {
 
 export interface CacheHandler<State> {
     name: string;
-    set(change: StateChange<State>, options: SetStateOptions<State>, stateServiceInstance: LitElementStateService<State>);
+    set(change: StateChange<State>, stateServiceInstance: LitElementStateService<State>);
     load(stateServiceInstance: LitElementStateService<State>): StateChange<State>;
 }
 
