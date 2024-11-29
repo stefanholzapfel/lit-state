@@ -1,4 +1,4 @@
-import {CacheHandler, LitElementStateService, SetStateOptions, StateChange} from '../index';
+import {CacheHandler, LitElementStateService, StateChange} from '../index';
 import {isExceptionFromDeepReduce, isObject} from '../litElementState.helpers';
 import {DeepPartial} from 'ts-essentials';
 
@@ -64,7 +64,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
             if (!isExceptionFromDeepReduce(change[key])) {
                 if (isObject(change[key])) {
                     if ('_arrayOperation' in change[key] || Array.isArray(change[key])) {
-                        let newArray = stateServiceInstance.get(path.slice(prependedCount) as any);
+                        let newArray = stateServiceInstance.get(fullPath.slice(prependedCount) as any);
                         localStorage.setItem(pathString, JSON.stringify({ v: newArray, t: 'array' }));
                         if (!this.localStorageKeys.has(pathString)) this.localStorageKeys.add(pathString);
                     } else {

@@ -128,3 +128,6 @@ Needs to be reverted to that:
 
 ## [5.0.5]
 - fix(cacheHandlers): Fix path creation in localstorage cacheHandler
+
+## [5.0.6]
+- fix(cacheHandlers): Take full path in localstorage cacheHandler on array update
