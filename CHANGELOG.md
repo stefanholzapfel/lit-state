@@ -119,3 +119,6 @@ Needs to be reverted to that:
 ## [5.0.2]
 - fix(cacheHandlers): Improve array handling for localstorage cacheHandler
 - fix(cacheHandlers): Fix typing error in localstorage cacheHandler
+
+## [5.0.3]
+- fix(cacheHandlers): Fix array merge error in localstorage cacheHandler
