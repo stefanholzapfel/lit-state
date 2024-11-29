@@ -1,4 +1,4 @@
-import {CacheHandler, LitElementStateService, StateChange} from '../index';
+import {CacheHandler, LitElementStateService, SetStateOptions, StateChange} from '../index';
 import {isExceptionFromDeepReduce, isObject} from '../litElementState.helpers';
 import {DeepPartial} from 'ts-essentials';
 
@@ -47,31 +47,38 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         });
     };
 
-    set(change: StateChange<State> | DeepPartial<StateChange<State>>, stateServiceInstance: LitElementStateService<State>) {
-        const path = [ LOCALSTORAGE_PREFIX ];
+    set(change: StateChange<State>, options: SetStateOptions<State>, stateServiceInstance: LitElementStateService<State>) {
+         // TODO: Check if entrypath has Array Selectors (won't work!)
+        const path = [ LOCALSTORAGE_PREFIX, ...options?.entryPath ];
         if (!!stateServiceInstance?.config?.cache?.name) {
             path.push(stateServiceInstance.config.cache.name);
         }
-        this.setRecursive(change, path);
+        this.setRecursive(change, path, stateServiceInstance);
     }
 
-    private setRecursive(change: StateChange<State> | DeepPartial<StateChange<State>>, path: string[]) {
+    private setRecursive(change: StateChange<State>, path: string[], stateServiceInstance: LitElementStateService<State>) {
         for (const key in change as any) {
             const fullPath = [ ...path, key ];
             const pathString = fullPath.join('.');
             if (!isExceptionFromDeepReduce(change[key])) {
-                if (isObject(change[key]) && !Array.isArray(change[key])) {
-                    if ('_reducerMode' in change[key] && change[key]._reducerMode === 'replace') {
-                        this.unset(pathString);
+                if (isObject(change[key])) {
+                    if ('_arrayOperation' in change[key] || Array.isArray(change[key])) {
+                        let newArray = stateServiceInstance.get(path as any);
+                        localStorage.setItem(pathString, JSON.stringify({ v: newArray, t: 'array' }));
+                        if (!this.localStorageKeys.has(pathString)) this.localStorageKeys.add(pathString);
+                    } else {
+                        if ('_reducerMode' in change[key] && change[key]._reducerMode === 'replace') {
+                            this.unset(pathString);
+                            delete change[key]._reducerMode;
+                        }
+                        const newPart = { ...change[key] };
+                        this.setRecursive(newPart, fullPath, stateServiceInstance);
                     }
-                    const newPart = { ...change[key] };
-                    delete newPart._reducerMode;
-                    this.setRecursive(newPart, fullPath);
                 } else {
                     if (change[key] === null || change[key] === undefined) {
                         this.unset(pathString);
                     } else {
-                        localStorage.setItem(pathString, JSON.stringify({ v: change[key], t: Array.isArray(change[key]) ? 'array' : typeof change[key] }));
+                        localStorage.setItem(pathString, JSON.stringify({ v: change[key], t: typeof change[key] }));
                         if (!this.localStorageKeys.has(pathString)) this.localStorageKeys.add(pathString);
                     }
                 }

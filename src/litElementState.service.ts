@@ -606,18 +606,18 @@ export class LitElementStateService<State> {
             }
             stateChange = _statePartial as StateChange<State>;
         }
+        this.deepReduce(
+            this._state,
+            stateChange
+        );
         if (options?.cacheHandlerName) {
             const cacheHandler = this.cacheHandlers.get(options.cacheHandlerName);
             if (!cacheHandler) {
                 console.error(`lit-state: A cache handler with name ${options.cacheHandlerName} was not registered! This set call will not be persisted!`)
             } else {
-                cacheHandler.set(stateChange, this);
+                cacheHandler.set(stateChange, options, this);
             }
         }
-        this.deepReduce(
-            this._state,
-            stateChange
-        );
         for (const subscription of this.stateSubscriptions) {
             this.checkSubscriptionChange(subscription);
         }
