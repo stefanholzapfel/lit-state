@@ -40,7 +40,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                 object[segment] = value;
             } else {
                 if (!object.hasOwnProperty(segment)) {
-                    object[segment] = {};
+                    object[segment] = {} as any;
                 }
                 object = object[segment];
             }
