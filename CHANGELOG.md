@@ -131,3 +131,6 @@ Needs to be reverted to that:
 
 ## [5.0.6]
 - fix(cacheHandlers): Take full path in localstorage cacheHandler on array update
+
+## [5.0.7]
+- fix(cacheHandlers): Fix loading of array from localstorage

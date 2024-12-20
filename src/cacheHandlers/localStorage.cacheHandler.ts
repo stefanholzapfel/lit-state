@@ -5,7 +5,6 @@ import {DeepPartial} from 'ts-essentials';
 const LOCALSTORAGE_PREFIX = 'lit-state';
 
 class LocalStorageCacheHandler<State> implements CacheHandler<State> {
-    // TODO: ensure that this works with array feature
     name = 'localstorage';
     private localStorageKeys = new Set<string>();
 
@@ -25,7 +24,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                         this.setValue(res, path, +entry.v);
                         break;
                     case 'string':
-                    case 'array':
+                    case 'object':
                         this.setValue(res, path, entry.v);
                         break;
                 }
