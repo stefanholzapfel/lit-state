@@ -134,3 +134,6 @@ Needs to be reverted to that:
 
 ## [5.0.7]
 - fix(cacheHandlers): Fix loading of array from localstorage
+
+## [5.0.8]
+- chore(deps): Bump versions
