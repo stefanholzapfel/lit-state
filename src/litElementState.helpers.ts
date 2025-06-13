@@ -53,6 +53,11 @@ export const deepCopy = (obj) => {
 }
 
 export const deepCompare = (one, two): boolean => {
+    // Handle NaN
+    if (Number.isNaN(one)) {
+        return Number.isNaN(two);
+    }
+
     if (one === null || typeof one !== 'object' || isExceptionFromDeepReduce(one)) {
         return one === two;
     }
