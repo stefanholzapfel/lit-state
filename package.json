@@ -17,7 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "lit": "^3.3.0",
-    "ts-essentials": "^10.0.4"
+    "ts-essentials": "^10.1.1"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

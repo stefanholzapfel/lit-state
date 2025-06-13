@@ -137,3 +137,7 @@ Needs to be reverted to that:
 
 ## [5.0.8]
 - chore(deps): Bump versions
+
+## [5.0.9]
+- fix(deepCompare): handle NaN
+- chore(deps): Bump versions
