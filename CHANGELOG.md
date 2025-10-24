@@ -145,3 +145,6 @@ Needs to be reverted to that:
 ## [5.1.0]
 - chore(deps): Bump versions
 - feat(cacheHandlers): Allow exceptions from caching
+
+## [5.1.1]
+- fix(localStorageCacheHandler): fix array handling

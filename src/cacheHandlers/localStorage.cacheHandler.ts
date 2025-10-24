@@ -1,5 +1,5 @@
 import {CacheHandler, LitElementStateService, StateChange} from '../index';
-import {isExceptionFromDeepReduce, isObject} from '../litElementState.helpers';
+import {isExceptionFromDeepReduce} from '../litElementState.helpers';
 import {DeepPartial} from 'ts-essentials';
 
 const LOCALSTORAGE_PREFIX = 'lit-state';
@@ -25,6 +25,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                         break;
                     case 'string':
                     case 'object':
+                    case 'array':
                         this.setValue(res, path, entry.v);
                         break;
                 }
@@ -66,7 +67,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                     isCustomException = true;
             }
             if (!isCustomException && !isExceptionFromDeepReduce(change[key])) {
-                if (isObject(change[key])) {
+                if (typeof change[key] === 'object') {
                     if ('_arrayOperation' in change[key] || Array.isArray(change[key])) {
                         let newArray = stateServiceInstance.get(fullPath.slice(prependedCount) as any);
                         localStorage.setItem(pathString, JSON.stringify({ v: newArray, t: 'array' }));
