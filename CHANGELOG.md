@@ -148,3 +148,6 @@ Needs to be reverted to that:
 
 ## [5.1.1]
 - fix(localStorageCacheHandler): fix array handling
+
+## [5.1.2]
+- fix(localStorageCacheHandler): add missing null check

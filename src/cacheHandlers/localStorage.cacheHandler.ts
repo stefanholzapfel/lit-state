@@ -67,7 +67,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                     isCustomException = true;
             }
             if (!isCustomException && !isExceptionFromDeepReduce(change[key])) {
-                if (typeof change[key] === 'object') {
+                if (change[key] && typeof change[key] === 'object') {
                     if ('_arrayOperation' in change[key] || Array.isArray(change[key])) {
                         let newArray = stateServiceInstance.get(fullPath.slice(prependedCount) as any);
                         localStorage.setItem(pathString, JSON.stringify({ v: newArray, t: 'array' }));
