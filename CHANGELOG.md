@@ -154,3 +154,6 @@ Needs to be reverted to that:
 
 ## [5.1.3]
 - fix(localStorageCacheHandler): correct check order
+
+## [5.1.4]
+- chore: build step was forgotten in last version - use this instead of 5.1.3

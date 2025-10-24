@@ -1,6 +1,6 @@
 {
   "name": "@stefanholzapfel/lit-state",
-  "version": "5.1.3",
+  "version": "5.1.4",
   "description": "A reactive state management for Lit",
   "publishConfig": {
     "access": "public"
