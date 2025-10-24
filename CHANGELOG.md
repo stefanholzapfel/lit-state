@@ -151,3 +151,6 @@ Needs to be reverted to that:
 
 ## [5.1.2]
 - fix(localStorageCacheHandler): add missing null check
+
+## [5.1.3]
+- fix(localStorageCacheHandler): correct check order
