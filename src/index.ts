@@ -3,6 +3,7 @@ import {LitElementStateService} from './litElementState.service';
 export interface StateConfig<State> {
     cache?: {
         name?: string;
+        exceptions?: RegExp[];
         handlers: CacheHandler<State>[];
     };
     defaultSubscribeOptions?: SubscribeStateFromElementOptions;

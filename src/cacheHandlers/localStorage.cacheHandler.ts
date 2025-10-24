@@ -60,7 +60,12 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         for (const key in change as any) {
             const fullPath = [ ...path, key ];
             const pathString = fullPath.join('.');
-            if (!isExceptionFromDeepReduce(change[key])) {
+            let isCustomException = false;
+            for (const regEx of stateServiceInstance.config?.cache?.exceptions || []) {
+                if (regEx.test(key))
+                    isCustomException = true;
+            }
+            if (!isCustomException && !isExceptionFromDeepReduce(change[key])) {
                 if (isObject(change[key])) {
                     if ('_arrayOperation' in change[key] || Array.isArray(change[key])) {
                         let newArray = stateServiceInstance.get(fullPath.slice(prependedCount) as any);

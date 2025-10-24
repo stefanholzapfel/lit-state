@@ -305,29 +305,29 @@ stateService.set({
 
 <h1>(WIP) Persist state</h1>
 
-NOT FINISHED - DON'T USE!!
-
 To persist state and reload it on service instantiation provide an array of cache handlers in the state option's ```cache``` property.
 
 Optionally you can also provide a name to enable the cache handler to use different persistent caches for different state services.
 
 Example:
 ```
-new LitElementStateService<State>({
-                exampleState: {
-                    offline: false,
-                    mobile: false
-                }
-            },
-            {
-                global: true,
-                cache: {
-                    name: 'myState1',
-                    handlers: [
-                        new LocalStorageCacheHandler<State>()
-                    ]
-                }
-            }));
+new LitElementStateService<State>(
+    {
+        exampleState: {
+            offline: false,
+            mobile: false
+        }
+    },
+    {
+        global: true,
+        cache: {
+            name: 'myState1',
+            handlers: [
+                new LocalStorageCacheHandler<State>()
+            ]
+        }
+    }
+));
 ```
 
 The LocalStorageCacheHandler is provided with this package (others may follow). You can implement your own following the
@@ -355,3 +355,10 @@ The handler name is the ```name``` property of the cache handler.
 
 The cache handler has to be provided when instantiating the service,
 otherwise you will get an error.
+
+<h2>Exceptions from caching</h2>
+The ```StateConfig.cache.exceptions``` property allows you to define an array of exceptions for the cache handler.
+
+All keys (also nested ones) that match against any of the provided regular expressions will be omitted from caching.
+
+If you write a cache handler, this behavior has to be implemented in the ```set``` method of your cache handler.
