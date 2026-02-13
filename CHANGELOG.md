@@ -160,3 +160,6 @@ Needs to be reverted to that:
 
 ## [5.1.5]
 - fix(localStorageCacheHandler): typo in condition for arrays
+
+## [5.1.6]
+- chore(deps): Bump versions
