@@ -11,21 +11,33 @@
   },
   "scripts": {
     "build": "rm -rf ./dist/ && tsc",
+    "test:types": "npm run build && tsc --noEmit -p type-tests/tsconfig.strict.json && tsc --noEmit -p type-tests/tsconfig.loose.json && tsc --noEmit -p type-tests/tsconfig.eop.json",
     "publish_npm": "rm -rf ./dist/ && tsc && yarn publish"
   },
   "author": "Stefan Holzapfel",
   "license": "MIT",
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  },
   "dependencies": {
-    "lit": "^3.3.2",
-    "ts-essentials": "^10.1.1"
+    "ts-essentials": "^10.2.1"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "lit": "^3.3.3",
+    "typescript": "^6.0.3"
   },
   "type": "module",
-  "types": "dist/index.d.ts",
-  "main:": "dist/index.js",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./localStorageCacheHandler.js": {
+      "types": "./dist/cacheHandlers/localStorage.cacheHandler.d.ts",
+      "default": "./dist/cacheHandlers/localStorage.cacheHandler.js"
+    }
+  },
   "files": [
     "dist",
     "src"

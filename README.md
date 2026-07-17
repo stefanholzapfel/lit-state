@@ -86,8 +86,8 @@ const subscription = litService.subscribe(['app', 'offline'], value => {
 }) 
 ```
 
-When subscribing to LitElementStateService provide the path to the "partial" of the state to observe as a string array.
-You can go arbitrarily deep but the typing only supports 6 levels.
+When subscribing to LitElementStateService provide the path to the "partial" of the state to observe as a string array. 
+You can go arbitrarily deep.
 
 As third parameter you could again override the default subscription parameters (see chapter "Initiate").
 
@@ -232,6 +232,9 @@ stateService.set(0, { entryPath: ['books', 'bookCount'] })
 
 It's a matter of taste if / when to use this array notation for navigating to the entry point, but some users might find it more elegant.
 
+The `entryPath` is fully typed: every segment is validated against your state (with IDE suggestions), and the state
+partial you pass is checked against the value at the path's end.
+
 **Hint**: You can use a PredicateFunction or a numeric index for array navigation in your entry path (see section "**Array operations**")
 
 
@@ -277,6 +280,15 @@ this.subscribeState(['books', { array: 'data', get: 10 }], value => {
 
 **Hint**: You can perform multiple array searches in the path (subscribe to elements in nested arrays). If you
 don't provide a predicate function or numeric index you will subscribe to the whole array. In this case it is the last segment in the path.
+
+**Note on predicate typing**: the parameters of a predicate function (`book`, `index` above) are typed automatically
+from the array you select (matched by the `array` name) — no annotations needed. Two special cases:
+- If the **same array name** exists at several places in your state with different element types, an unannotated
+  predicate parameter is typed as the **union** of those element types (the name alone cannot identify the position).
+  Either narrow inside the predicate (`'name' in field && field.name === ...`) or annotate the parameter with the
+  element type of the position you are addressing (`get: (field: MyFieldType) => ...`) — the annotation is validated
+  against the path, so annotating the wrong type for that position is an error.
+- Predicates in selectors that address an **index-signature key** (`{ [key: string]: Foo[] }`) must always be annotated.
 
 <h2> Manipulating array elements </h2>
 In your state changes you can also use this syntax to update, push or pull (remove) array elements:
@@ -330,7 +342,11 @@ new LitElementStateService<State>(
 ));
 ```
 
-The LocalStorageCacheHandler is provided with this package (others may follow). You can implement your own following the
+The LocalStorageCacheHandler is provided with this package via a dedicated subpath (others may follow):
+```
+import { LocalStorageCacheHandler } from '@stefanholzapfel/lit-state/localStorageCacheHandler.js';
+```
+You can implement your own following the
 ```CacheHandler``` interface.
 
 If you provide multiple handlers, they will load their initial state in the order you provide them (and therefore may overwrite each other).

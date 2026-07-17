@@ -3,17 +3,17 @@ import {
     StateSubscriptionFunction,
     SubscribeStateFromElementOptions,
     SubscribeStateOptions
-} from './index';
-import {deepCopy} from './litElementState.helpers';
+} from './index.js';
+import {deepCopy} from './litElementState.helpers.js';
 
 export class LitElementStateSubscription<SubscribedType> {
-    previousValue: SubscribedType = null;
-    value: SubscribedType = null;
-    valueDeepCopy: SubscribedType = null;
+    previousValue: SubscribedType | null = null;
+    value: SubscribedType | null = null;
+    valueDeepCopy: SubscribedType | null = null;
     path: StatePath<any>;
     closed = false;
-    
-    private subscriptionFunction;
+
+    private subscriptionFunction: StateSubscriptionFunction<SubscribedType>;
     private unsubscribeFunction: (subscription: LitElementStateSubscription<SubscribedType>) => void;
     subscriptionOptions: SubscribeStateOptions | SubscribeStateFromElementOptions;
     
@@ -28,7 +28,7 @@ export class LitElementStateSubscription<SubscribedType> {
         this.path = path;
         this.subscriptionFunction = subscriptionFunction;
         this.unsubscribeFunction = unsubscriptionFunction;
-        this.subscriptionOptions = subscriptionOptions;
+        this.subscriptionOptions = subscriptionOptions!;
     }
 
     next(value: SubscribedType, initial = false) {

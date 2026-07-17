@@ -1,0 +1,17 @@
+{
+  // IDE config for the type-test files: editors pick the nearest tsconfig.json,
+  // and without this one they would fall back to the root config (rootDir: src)
+  // and report TS6059 for everything in this directory. The npm test:types
+  // script uses the specific tsconfig.strict/loose/eop.json variants instead.
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2020",
+    "lib": ["dom", "es2020"],
+    "experimentalDecorators": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts"]
+}

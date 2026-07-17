@@ -1,5 +1,5 @@
-import {CacheHandler, LitElementStateService, StateChange} from '../index';
-import {isExceptionFromDeepReduce} from '../litElementState.helpers';
+import {CacheHandler, LitElementStateService, StateChange} from '../index.js';
+import {isExceptionFromDeepReduce} from '../litElementState.helpers.js';
 import {DeepPartial} from 'ts-essentials';
 
 const LOCALSTORAGE_PREFIX = 'lit-state';
@@ -15,7 +15,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
             if (key.startsWith(fullPrefix)) {
                 this.localStorageKeys.add(key);
                 const path = key.substring(fullPrefix.length).split('.');
-                const entry = JSON.parse(localStorage.getItem(key));
+                const entry = JSON.parse(localStorage.getItem(key)!);
                 switch (entry.t) {
                     case 'boolean':
                         this.setValue(res, path, entry.v === true);
@@ -34,10 +34,10 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         return res as any;
     }
 
-    private setValue(object: DeepPartial<State>, path: string[], value: any) {
+    private setValue(object: any, path: string[], value: any) {
         path.forEach((segment, index) => {
             if (index === path.length - 1) {
-                object[segment] = value;
+                object[segment] = value as any;
             } else {
                 if (!object.hasOwnProperty(segment)) {
                     object[segment] = {} as any;
@@ -57,7 +57,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         this.setRecursive(change, path, stateServiceInstance, prependedCount);
     }
 
-    private setRecursive(change: StateChange<State>, path: string[], stateServiceInstance: LitElementStateService<State>, prependedCount: number) {
+    private setRecursive(change: any, path: string[], stateServiceInstance: LitElementStateService<State>, prependedCount: number) {
         for (const key in change as any) {
             const fullPath = [ ...path, key ];
             const pathString = fullPath.join('.');
@@ -103,7 +103,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         }
     }
 
-    private getFullPrefix(stateServiceInstance?: LitElementStateService<State>): string {
+    private getFullPrefix(stateServiceInstance: LitElementStateService<State>): string {
         return `${LOCALSTORAGE_PREFIX}.${ stateServiceInstance.config?.cache?.name ? `${stateServiceInstance.config?.cache?.name}.` : '' }`;
     }
 }

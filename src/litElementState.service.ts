@@ -1,22 +1,21 @@
 import {DeepPartial} from 'ts-essentials';
 import {
-    ArrayElementSelector,
-    CacheHandler, GetStateOptions, SetStateOptions,
+    CacheHandler, CheckedStatePath, GetStateOptions, SetStateOptions,
     StateChange,
-    StateConfig, StatePath,
+    StateConfig, StatePath, StatePathConstraint, StatePathValue,
     StateSubscriptionFunction,
     SubscribeStateOptions
-} from './index';
-import {LitElementStateSubscription} from './litElementStateSubscription';
+} from './index.js';
+import {LitElementStateSubscription} from './litElementStateSubscription.js';
 import {
     deepCompare, deepCopy,
     isExceptionFromDeepReduce,
     isObject,
     subscribeOptionsFromDefaultOrParams
-} from './litElementState.helpers';
+} from './litElementState.helpers.js';
 
 export class LitElementStateService<State> {
-    private static _globalInstance;
+    private static _globalInstance: any;
     config: StateConfig<State>;
     private stateSubscriptions: LitElementStateSubscription<any>[] = [];
     private cacheHandlers: Map<string, CacheHandler<State>> = new Map();
@@ -34,19 +33,19 @@ export class LitElementStateService<State> {
                 autoUnsubscribe: true,
                 ...config?.defaultSubscribeOptions
             },
-            ...config.cache && {cache: config.cache}
+            ...config!.cache && {cache: config!.cache}
         }
 
         this.config?.cache?.handlers.forEach(cacheHandler => {
             this.cacheHandlers.set(cacheHandler.name, cacheHandler);
-            initialState = this.deepReduce(initialState, cacheHandler.load(this));
+            initialState = this.deepReduce(initialState!, cacheHandler.load(this));
         })
 
         if (this.config.global) {
             LitElementStateService._globalInstance = this;
         }
 
-        this._state = initialState;
+        this._state = initialState!;
     }
 
     private _state: State;
@@ -59,192 +58,15 @@ export class LitElementStateService<State> {
         return LitElementStateService._globalInstance;
     }
 
-    // Overloads
-    subscribe<K1 extends keyof State,
-        T1 extends State[K1]>(
-        path: readonly [ State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1 ],
-        subscriptionFunction: StateSubscriptionFunction<T1>,
+    // Overload
+    subscribe<const P extends StatePathConstraint<State>>(
+        path: CheckedStatePath<State, P>,
+        subscriptionFunction: StateSubscriptionFunction<StatePathValue<State, P>>,
         options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T1>;
-    subscribe<K1 extends keyof State,
-        T1 extends State[K1]>(
-        path: readonly [ K1 ],
-        subscriptionFunction: StateSubscriptionFunction<T1>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T1>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T2>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T2>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            K2
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T1[K2]>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T1[K2]>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T3>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T3>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            K3
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T2[K3]>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T2[K3]>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T4>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T4>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            K4
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T3[K4]>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T3[K4]>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T5>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T5>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            K5
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T4[K5]>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T4[K5]>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5,
-            T5[K6] extends Array<any> ? ArrayElementSelector<K6, T6> : K6
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T6>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T6>;
-    subscribe<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5,
-            K6
-        ],
-        subscriptionFunction: StateSubscriptionFunction<T5[K6]>,
-        options?: SubscribeStateOptions
-    ): LitElementStateSubscription<T5[K6]>;
+    ): LitElementStateSubscription<StatePathValue<State, P>>;
     // Implementation
     subscribe<Part>(
-        path: StatePath<State>,
+        path: any, // loose on purpose: the public overload types the path
         subscriptionFunction: StateSubscriptionFunction<Part>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<Part> {
@@ -277,286 +99,14 @@ export class LitElementStateService<State> {
         }
     }
 
-    // Overloads
-    get<K1 extends keyof State,
-        T1 extends State[K1]>(
-        path: readonly [ State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1 ],
+    // Overload
+    get<const P extends StatePathConstraint<State>>(
+        path: CheckedStatePath<State, P>,
         options?: GetStateOptions
-    ): T1;
-    get<K1 extends keyof State,
-        T1 extends State[K1]>(
-        path: readonly [ K1 ],
-        options?: GetStateOptions
-    ): T1;
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2
-        ],
-        options?: GetStateOptions
-    ): T2;
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            K2
-        ],
-        options?: GetStateOptions
-    ): T1[K2];
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3
-        ],
-        options?: GetStateOptions
-    ): T3;
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            K3
-        ],
-        options?: GetStateOptions
-    ): T2[K3];
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4
-        ],
-        options?: GetStateOptions
-    ): T4;
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            K4
-        ],
-        options?: GetStateOptions
-    ): T3[K4];
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5])>(
-        path: readonly  [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5
-        ],
-        options?: GetStateOptions
-    ): T5;
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5])>(
-        path: readonly  [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            K5
-        ],
-        options?: GetStateOptions
-    ): T4[K5];
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5,
-            T5[K6] extends Array<any> ? ArrayElementSelector<K6, T6> : K6
-        ],
-        options?: GetStateOptions
-    ): T6;
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5,
-            K6
-        ],
-        options?: GetStateOptions
-    ): T5[K6];
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6]),
-        K7 extends keyof T6,
-        T7 extends (T6[K7] extends Array<any> ? T6[K7][number] : T6[K7])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5,
-            T5[K6] extends Array<any> ? ArrayElementSelector<K6, T6> : K6,
-            T6[K7] extends Array<any> ? ArrayElementSelector<K7, T7> : K7
-        ],
-        options?: GetStateOptions
-    ): T7;
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6]),
-        K7 extends keyof T6,
-        T7 extends (T6[K7] extends Array<any> ? T6[K7][number] : T6[K7])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5,
-            T5[K6] extends Array<any> ? ArrayElementSelector<K6, T6> : K6,
-            K7
-        ],
-        options?: GetStateOptions
-    ): T6[K7];
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6]),
-        K7 extends keyof T6,
-        T7 extends (T6[K7] extends Array<any> ? T6[K7][number] : T6[K7]),
-        K8 extends keyof T7,
-        T8 extends (T7[K8] extends Array<any> ? T7[K8][number] : T7[K8])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5,
-            T5[K6] extends Array<any> ? ArrayElementSelector<K6, T6> : K6,
-            T6[K7] extends Array<any> ? ArrayElementSelector<K7, T7> : K7,
-            T7[K8] extends Array<any> ? ArrayElementSelector<K8, T8> : K8
-        ],
-        options?: GetStateOptions
-    ): T8;
-    get<K1 extends keyof State,
-        T1 extends (State[K1] extends Array<any> ? State[K1][number] : State[K1]),
-        K2 extends keyof T1,
-        T2 extends (T1[K2] extends Array<any> ? T1[K2][number] : T1[K2]),
-        K3 extends keyof T2,
-        T3 extends (T2[K3] extends Array<any> ? T2[K3][number] : T2[K3]),
-        K4 extends keyof T3,
-        T4 extends (T3[K4] extends Array<any> ? T3[K4][number] : T3[K4]),
-        K5 extends keyof T4,
-        T5 extends (T4[K5] extends Array<any> ? T4[K5][number] : T4[K5]),
-        K6 extends keyof T5,
-        T6 extends (T5[K6] extends Array<any> ? T5[K6][number] : T5[K6]),
-        K7 extends keyof T6,
-        T7 extends (T6[K7] extends Array<any> ? T6[K7][number] : T6[K7]),
-        K8 extends keyof T7,
-        T8 extends (T7[K8] extends Array<any> ? T7[K8][number] : T7[K8])>(
-        path: readonly [
-            State[K1] extends Array<any> ? ArrayElementSelector<K1, T1> : K1,
-            T1[K2] extends Array<any> ? ArrayElementSelector<K2, T2> : K2,
-            T2[K3] extends Array<any> ? ArrayElementSelector<K3, T3> : K3,
-            T3[K4] extends Array<any> ? ArrayElementSelector<K4, T4> : K4,
-            T4[K5] extends Array<any> ? ArrayElementSelector<K5, T5> : K5,
-            T5[K6] extends Array<any> ? ArrayElementSelector<K6, T6> : K6,
-            T6[K7] extends Array<any> ? ArrayElementSelector<K7, T7> : K7,
-            K8
-        ],
-        options?: GetStateOptions
-    ): T7[K8];
+    ): StatePathValue<State, P>;
     // Implementation
     get<Part>(
-        path: StatePath<State>,
+        path: any, // loose on purpose: the public overload types the path
         options?: GetStateOptions
     ): Part {
         options = subscribeOptionsFromDefaultOrParams(options, this);
@@ -579,8 +129,22 @@ export class LitElementStateService<State> {
         return options?.getDeepCopy ? deepCopy(part) : part;
     }
 
+    // Overload: with a typed entry path — the path is validated/suggested like
+    // subscription paths and statePartial is checked against the value at the
+    // path's end (plain value or a StateChange of it).
+    set<const P extends StatePathConstraint<State>>(
+        statePartial: StatePathValue<State, P> | StateChange<StatePathValue<State, P>>,
+        options: SetStateOptions<State> & { entryPath: CheckedStatePath<State, P> }
+    ): void;
+    // Overload: whole-state change. `Omit` makes literals with an entryPath fail
+    // this overload (excess property), so they are typed by the overload above;
+    // pre-built option objects (non-fresh) still match for backward compatibility.
     set<TargetedState = State>(
         statePartial: StateChange<TargetedState>,
+        options?: Omit<SetStateOptions<State>, 'entryPath'>
+    ): void;
+    set(
+        statePartial: any,
         options?: SetStateOptions<State>
     ) {
         let stateChange = statePartial as StateChange<State>;
@@ -638,7 +202,7 @@ export class LitElementStateService<State> {
         subscriptionPath: StatePath<State>,
         state: State
     ): DeepPartial<State> | undefined {
-        let partial = state as object;
+        let partial = state as any;
         for (let [index, segment] of subscriptionPath.entries()) {
             const isLastSegmentInPath = index === subscriptionPath.length - 1;
             if ((typeof segment === 'object') && segment.hasOwnProperty('array') && segment.hasOwnProperty('get')) {
@@ -664,7 +228,7 @@ export class LitElementStateService<State> {
         }
     }
 
-    private deepReduce(state: State, change: StateChange<State>) {
+    private deepReduce(state: any, change: any) {
         for (const key in change as any) {
             // Handle array operators
             if (isObject(change[key]) && '_arrayOperation' in change[key]) {
@@ -684,8 +248,8 @@ export class LitElementStateService<State> {
                             state[key][arrayOperation.at] = val;
                         }
                     } else if (arrayOperation.at instanceof Function) {
-                        const indices = []
-                        state[key].forEach((elem, index) => {
+                        const indices: number[] = []
+                        state[key].forEach((elem: any, index: number) => {
                            if ([elem].find(arrayOperation.at)) indices.push(index);
                         });
                         indices.forEach(index => {

@@ -1,11 +1,11 @@
-import {LitElementStateService, SubscribeStateFromElementOptions} from './index';
+import {LitElementStateService, SubscribeStateFromElementOptions} from './index.js';
 
-export const isObject = (item) => {
+export const isObject = (item: any) => {
     return (item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Map) && !(item instanceof Set));
 }
 
-export const deepCopy = (obj) => {
-    let copy;
+export const deepCopy = (obj: any): any => {
+    let copy: any;
 
     // Handle the 3 simple types, null, undefined and Promises
     if (null == obj || 'object' !== typeof obj || isExceptionFromDeepReduce(obj)) {
@@ -52,7 +52,7 @@ export const deepCopy = (obj) => {
     throw new Error('Unable to copy obj! Its type isn\'t supported.');
 }
 
-export const deepCompare = (one, two): boolean => {
+export const deepCompare = (one: any, two: any): boolean | undefined => {
     // Handle NaN
     if (Number.isNaN(one)) {
         return Number.isNaN(two);
@@ -95,7 +95,7 @@ export const deepCompare = (one, two): boolean => {
     }
 }
 
-export const subscribeOptionsFromDefaultOrParams = (options: SubscribeStateFromElementOptions, service: LitElementStateService<any>): SubscribeStateFromElementOptions => {
+export const subscribeOptionsFromDefaultOrParams = (options: SubscribeStateFromElementOptions | undefined, service: LitElementStateService<any>): SubscribeStateFromElementOptions => {
     return {
         ...service.config.defaultSubscribeOptions,
         ...options ?? {}
