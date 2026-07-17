@@ -36,6 +36,10 @@
     "./localStorageCacheHandler.js": {
       "types": "./dist/cacheHandlers/localStorage.cacheHandler.d.ts",
       "default": "./dist/cacheHandlers/localStorage.cacheHandler.js"
+    },
+    "./helpers.js": {
+      "types": "./dist/litElementState.helpers.d.ts",
+      "default": "./dist/litElementState.helpers.js"
     }
   },
   "files": [
