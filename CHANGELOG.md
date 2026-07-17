@@ -168,3 +168,6 @@ Needs to be reverted to that:
 - fix(types): Rework types, dependencies and packaging
 - **BREAKING (packaging)**: Added an `exports` map. The root entry (`@stefanholzapfel/lit-state`) exposes the service, the stateful element base class, the subscription and the shared types; the localStorage cache handler is available via the dedicated subpath `@stefanholzapfel/lit-state/localStorageCacheHandler.js`. Arbitrary deep imports into `dist/` are no longer resolvable.
 - **BREAKING (types only)**: consumers must be on TypeScript >= 5.0 (the signatures use a `const` type parameter).
+
+## [6.0.1]
+- chore: export helpers

@@ -5,6 +5,33 @@ A lightweight reactive state management for Lit
 
 `npm install @stefanholzapfel/lit-state`
 
+<h1>Imports</h1>
+
+The package ships as native ESM and exposes three entry points.
+
+**Root** — the state service, the `LitElement` base class, the subscription class and all shared types:
+```
+import {
+    LitElementStateService,
+    LitElementStateful,
+    LitElementStateSubscription,
+    // ...plus the shared types, e.g. StateChange, StatePath, CacheHandler, ...
+} from '@stefanholzapfel/lit-state';
+```
+
+**Cache handlers** — provided via dedicated subpaths:
+```
+import { LocalStorageCacheHandler } from '@stefanholzapfel/lit-state/localStorageCacheHandler.js';
+```
+
+**Helpers** — the utility functions used internally, in case you need them in your own code:
+```
+import { deepCopy, deepCompare } from '@stefanholzapfel/lit-state/helpers.js';
+```
+The `helpers.js` subpath also exposes `isObject`, `isExceptionFromDeepReduce` and `subscribeOptionsFromDefaultOrParams`.
+
+**Note**: the trailing `.js` in the subpath specifiers is required — it is part of the published subpath name, not a file extension you can omit.
+
 <h1>Initiate</h1>
 
 Create an interface that represents your state, e.g.:
@@ -342,7 +369,7 @@ new LitElementStateService<State>(
 ));
 ```
 
-The LocalStorageCacheHandler is provided with this package via a dedicated subpath (others may follow):
+The LocalStorageCacheHandler is provided with this package via a dedicated subpath:
 ```
 import { LocalStorageCacheHandler } from '@stefanholzapfel/lit-state/localStorageCacheHandler.js';
 ```
