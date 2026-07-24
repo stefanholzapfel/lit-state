@@ -1,8 +1,9 @@
 import {DeepPartial} from 'ts-essentials';
 import {
-    CacheHandler, CheckedStatePath, GetStateOptions, NoInfer_, SetStateOptions,
+    ArrayElementSelector,
+    CacheHandler, CheckedStatePath, GetStateOptions, SetStateOptions,
     StateChange,
-    StateConfig, StatePath, StatePathConstraint, StatePathValue,
+    StateConfig, StatePath, StatePathValue,
     StateSubscriptionFunction,
     SubscribeStateOptions
 } from './index.js';
@@ -58,13 +59,11 @@ export class LitElementStateService<State> {
         return LitElementStateService._globalInstance;
     }
 
-    // Overload
-    subscribe<const P extends StatePathConstraint<State>>(
+    subscribe<const P extends StatePath<State>>(
         path: CheckedStatePath<State, P>,
         subscriptionFunction: StateSubscriptionFunction<StatePathValue<State, P>>,
         options?: SubscribeStateOptions
     ): LitElementStateSubscription<StatePathValue<State, P>>;
-    // Implementation
     subscribe<Part>(
         path: any, // loose on purpose: the public overload types the path
         subscriptionFunction: StateSubscriptionFunction<Part>,
@@ -99,12 +98,10 @@ export class LitElementStateService<State> {
         }
     }
 
-    // Overload
-    get<const P extends StatePathConstraint<State>>(
+    get<const P extends StatePath<State>>(
         path: CheckedStatePath<State, P>,
         options?: GetStateOptions
     ): StatePathValue<State, P>;
-    // Implementation
     get<Part>(
         path: any, // loose on purpose: the public overload types the path
         options?: GetStateOptions
@@ -117,61 +114,51 @@ export class LitElementStateService<State> {
         return options?.getDeepCopy ? deepCopy(part) : part;
     }
 
-    getUntyped<Part>(
-        path: StatePath<State>,
-        options?: GetStateOptions
-    ): Part {
-        options = subscribeOptionsFromDefaultOrParams(options, this);
-        const part = this.getStateData(
-            path,
-            this._state
-        ) as Part;
-        return options?.getDeepCopy ? deepCopy(part) : part;
+    /** Builds a reusable path constant with the same position-exact validation,
+     *  IDE suggestions and predicate auto-typing as the path methods — State is
+     *  inferred from this service instance. The exact tuple type is preserved,
+     *  so get()/subscribe() calls with the constant stay fully typed (a
+     *  StatePath<State> annotation would only shape-check). */
+    checkPath<const P extends StatePath<State>>(path: CheckedStatePath<State, P>): P {
+        return path as P;
     }
 
     // Overload: with a typed entry path — the path is validated/suggested like
     // subscription paths and statePartial is checked against the value at the
-    // path's end (plain value or a StateChange of it). The loose entryPath of
-    // SetStateOptions is Omitted from the intersection: its shape lacks the
-    // `| Function` selector alternative ([4] in index.ts), so it would reject
-    // dynamic paths typed with StatePathConstraint<State>.
-    set<const P extends StatePathConstraint<State>>(
+    // path's end (plain value or a StateChange of it).
+    set<const P extends StatePath<State>>(
         statePartial: StatePathValue<State, P> | StateChange<StatePathValue<State, P>>,
-        options: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath: CheckedStatePath<State, P> }
+        options: SetStateOptions & { entryPath: CheckedStatePath<State, P> }
     ): void;
     // Overload: EXPLICIT target type + entry path — for dynamic (non-literal)
     // paths, whose end value is unknowable to the type system: the caller
     // asserts it, e.g. set<SubState>(partial, { entryPath: dynamicPath }).
-    // Target defaults to never and is NoInfer_'d, so this overload only
+    // Target defaults to never and is NoInfer'd, so this overload only
     // participates when the type argument is given explicitly — otherwise it
     // would catch calls with invalid literal paths that fall through the
     // overload above (Target inferred from statePartial checks nothing). The
-    // path is only shape-checked here, not position-exact; the loose
-    // StatePath alternative admits legacy StatePath<...>-typed variables.
+    // path is only shape-checked here, not position-exact.
     set<Target = never>(
-        statePartial: StateChange<NoInfer_<Target>>,
-        options: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath: StatePathConstraint<State> | StatePath<State> }
+        statePartial: StateChange<NoInfer<Target>>,
+        options: SetStateOptions & { entryPath: StatePath<State> }
     ): void;
-    // Overload: whole-state change. `Omit` makes literals with an entryPath fail
-    // this overload (excess property), so they are typed by the overloads above;
-    // pre-built option objects (non-fresh) still match for backward compatibility.
-    // TargetedState is NoInfer_'d: unannotated calls are checked against the
-    // full State; an explicit type argument still targets a sub-state.
+    // Overload: whole-state change. SetStateOptions has no entryPath, so fresh
+    // literals with one fail this overload (excess property) and are typed by
+    // the overloads above. TargetedState is NoInfer'd: unannotated calls are
+    // checked against the full State; an explicit type argument still targets
+    // a sub-state.
     //
     // Note on the implementation signature below (not visible in the published
     // types): entryPath is widened to `any` so the checked overload stays
     // assignable — for an uninferred P, CheckedStatePath<State, P> is an
-    // unresolved conditional that TS cannot relate to StatePath<State>. The
-    // plain SetStateOptions<State> must not appear as an intersection
-    // constituent there for the same reason. (This comment sits on the erased
-    // overload, not the implementation, to keep the JS emit unchanged.)
+    // unresolved conditional that TS cannot relate to any concrete path shape.
     set<TargetedState = State>(
-        statePartial: StateChange<NoInfer_<TargetedState>>,
-        options?: Omit<SetStateOptions<State>, 'entryPath'>
+        statePartial: StateChange<NoInfer<TargetedState>>,
+        options?: SetStateOptions
     ): void;
     set(
         statePartial: any,
-        options?: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath?: any }
+        options?: SetStateOptions & { entryPath?: any }
     ) {
         let stateChange = statePartial as StateChange<State>;
         if (options?.entryPath) {
@@ -225,7 +212,7 @@ export class LitElementStateService<State> {
     }
 
     private getStateData(
-        subscriptionPath: StatePath<State>,
+        subscriptionPath: readonly (string | ArrayElementSelector<string, any>)[],
         state: State
     ): DeepPartial<State> | undefined {
         let partial = state as any;

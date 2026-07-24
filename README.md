@@ -241,7 +241,7 @@ stateService.set({
 **Note**: You shouldn't use `_reducerMode` or `_arrayOperation` properties nested in a `{ _reducerMode: 'replace' }` branch, 
 since this branch as a whole will be replaced and this special properties won't be handled.
 
-When you have changes in a deeply nested path you can use the `entryPath` on the `SetStateOptions` to navigate to the entryPoint for your change. E.g. if instead of
+When you have changes in a deeply nested path you can use the `entryPath` option to navigate to the entryPoint for your change. E.g. if instead of
 
 ```
 stateService.set({
@@ -260,14 +260,23 @@ stateService.set(0, { entryPath: ['books', 'bookCount'] })
 It's a matter of taste if / when to use this array notation for navigating to the entry point, but some users might find it more elegant.
 
 The `entryPath` is fully typed: every segment is validated against your state (with IDE suggestions), and the state
-partial you pass is checked against the value at the path's end.
+partial you pass is checked against the value at the path's end. Without an `entryPath` the partial is checked against
+the full state.
 
-Without an `entryPath` the partial is checked against the full state. If you build entry paths **dynamically** (a
-variable instead of a literal), type the variable as `StatePathConstraint<State>` — the value at the path's end is then
-unknowable to the compiler, so the partial is unchecked. To get checking back, pass the target type explicitly:
+To **reuse a path**, build it with `checkPath()` (available on the service and on elements) — the constant stays fully
+validated and exactly typed everywhere you use it:
 
 ```
-const dynamicPath: StatePathConstraint<AppState> = ['caches', cacheKey];
+const badgesPath = stateService.checkPath(['users', { array: 'data', get: user => user.id === id }, 'badges']);
+stateService.get(badgesPath); // exact value type
+```
+
+Only when a path **can't be known at compile time** (segments computed at runtime), annotate it as `StatePath<State>`
+instead. Such a path is merely shape-checked and its end value is unknowable, so pass the target type explicitly to
+keep the partial checked:
+
+```
+const dynamicPath: StatePath<AppState> = ['caches', cacheKey];
 stateService.set<CacheEntry>({ ... }, { entryPath: dynamicPath })
 ```
 

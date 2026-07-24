@@ -45,10 +45,9 @@ export interface SubscribeStateFromElementOptions extends SubscribeStateOptions 
     autoUnsubscribe?: boolean;
 }
 
-export interface SetStateOptions<State> {
-    // Ṕrovide the name of a cache handler to use it for persistence with this set state call
+export interface SetStateOptions {
+    // Provide the name of a cache handler to use it for persistence with this set state call
     cacheHandlerName?: string;
-    entryPath?: StatePath<State>;
 }
 
 export type StateChange<State> =
@@ -70,7 +69,7 @@ export type StateChange<State> =
 // One generic signature per path method (subscribe / get / subscribeState /
 // connectState):
 //
-//   method<const P extends StatePathConstraint<State>>(path: CheckedStatePath<State, P>, ...)
+//   method<const P extends StatePath<State>>(path: CheckedStatePath<State, P>, ...)
 //
 // The given path is validated segment by segment — linear in the path length
 // (possible paths of State are NEVER enumerated). String literals are kept
@@ -104,17 +103,6 @@ export type StateChange<State> =
 //     (`'data' | string` reduces to `string`).
 // [6] `never extends readonly any[]` and `any extends readonly any[]` are both
 //     true — never-/any-typed properties must be guarded out of array checks.
-
-/** Loose path shape: used by the implementation signatures,
- *  LitElementStateSubscription.path and SetStateOptions.entryPath. */
-export type StatePath<State> = readonly (string | ArrayElementSelector<string, any>)[];
-
-/** Equivalent of the TS 5.4 `NoInfer` intrinsic, compatible with the TS >= 5.0
- *  consumer floor: keeps a type parameter out of inference, so it resolves to
- *  its declared default unless given explicitly. Used on the target-typed
- *  set()/setState() overloads — without it, the target would be inferred FROM
- *  statePartial and the check would vacuously pass for any argument. */
-export type NoInfer_<T> = [T][T extends any ? 0 : never];
 
 /** True only for `any`. */
 type IsAny<T> = 0 extends (1 & T) ? true : false;
@@ -190,7 +178,7 @@ type ValidatePath<State, P, Acc extends readonly unknown[] = readonly []> =
             : readonly [...Acc, SegmentOut<State, Head, true>])
         : P extends readonly []
             ? readonly [...Acc, AllowedSegments<State, true>]
-            : StatePathConstraint<State>;
+            : StatePath<State>;
 
 /** P itself when it matches the expected tuple (the naked P here carries the
  *  literal inference), otherwise the expected tuple (per-segment errors). */
@@ -252,11 +240,18 @@ type DeepArraySelectors<T> =
                     : never)
         : never;
 
-/** Constraint of the path type parameter: any sequence of keys and well-formed
- *  selectors for arrays existing anywhere in State. Doubles as the contextual
- *  type that auto-types unannotated predicates — plain union + distributive
- *  conditional are both required, see [1]. */
-export type StatePathConstraint<State> =
+/** The public path type: constraint of the path type parameter (any sequence
+ *  of keys and well-formed selectors for arrays existing anywhere in State)
+ *  and the type for DYNAMIC (non-literal) path variables. Doubles as the
+ *  contextual type that auto-types unannotated predicates — plain union +
+ *  distributive conditional are both required, see [1].
+ *
+ *  NOTE: do NOT use StatePath<any>/StatePath<unknown> for state-agnostic
+ *  storage — DeepArraySelectors guards `any` out (per [6]) and finds nothing
+ *  in `unknown`, so both collapse to `readonly string[]` and reject selector
+ *  segments. State-agnostic code (e.g. LitElementStateSubscription.path)
+ *  inlines the loose shape `readonly (string | ArrayElementSelector<string, any>)[]`. */
+export type StatePath<State> =
     State extends unknown ? readonly (string | DeepArraySelectors<State>)[] : never;
 
 /** Parameter type of the public path methods: position-exact validation and

@@ -150,13 +150,11 @@ svc.set({ title: 'x' }, { entryPath: ['books', 'data', 'title'] });
 comp3.setState(true, { entryPath: ['app', 'offlin'] });
 
 // ── dynamic (non-literal) paths ──────────────────────────────────────────
-// A path variable typed with the exported constraint is accepted by ALL path
-// methods — including set(), whose checked overload must NOT intersect the
-// loose SetStateOptions.entryPath (its StatePath shape rejects the
-// constraint's `| Function` selector alternative, see [4] in index.ts).
-import { StatePathConstraint, StateChange } from '../dist/index';
+// A path variable typed with the exported StatePath (the constraint type) is
+// accepted by ALL path methods — including set().
+import { StatePath, StateChange } from '../dist/index';
 declare const dynKey: string;
-const dynPath: StatePathConstraint<State> = ['dictionary', dynKey];
+const dynPath: StatePath<State> = ['dictionary', dynKey];
 svc.get(dynPath);
 svc.subscribe(dynPath, v => {});
 svc.set({ title: 'x' }, { entryPath: dynPath });
@@ -177,17 +175,33 @@ comp3.setState<Book>({ title: 'x' }, { entryPath: dynPath });
 svc.set<Book>({ nope: 1 }, { entryPath: dynPath });
 // @ts-expect-error — partial does not match the explicit target (stateful mirror)
 comp3.setState<Book>({ nope: 1 }, { entryPath: dynPath });
-// Explicit target also admits legacy loose-typed path variables (the
-// StatePath type parameter is unused — only the shape counts). NOTE: without
-// the explicit target such a path may or may not pass the checked overload —
-// its ArrayElementSelector<string, any> members satisfy the constraint only
-// when State contains a plain-string pattern-key array (like arrayDictionary
-// here), and then statePartial degrades to `any`. The explicit target makes
-// the partial checked either way:
-import { StatePath } from '../dist/index';
-declare const legacyPath: StatePath<Book>;
-svc.set<Book>({ title: 'x' }, { entryPath: legacyPath });
-comp3.setState<Book>({ title: 'x' }, { entryPath: legacyPath });
+// A dynamic path with a selector segment also satisfies StatePath<State>
+// (the merged selector member carries `| Function` in `get`, see [4]):
+declare const dynIndex: number;
+const dynSelectorPath: StatePath<State> = ['books', { array: 'data', get: dynIndex }];
+svc.set<Book>({ title: 'x' }, { entryPath: dynSelectorPath });
+
+// ── checkPath(): validated reusable path constants ───────────────────────
+// StatePath<State> annotations only shape-check (any string is a valid segment
+// somewhere); the builders run the same position-exact validation as the path
+// methods and preserve the exact tuple type.
+const builtPath = svc.checkPath(['books', { array: 'data', get: b => b.title === 'x' }, 'author']);
+const builtValue: Author | undefined = svc.get(builtPath);
+svc.subscribe(builtPath, v => expectType<Author | undefined | null>(v.current));
+svc.set({ name: 'x' }, { entryPath: builtPath });
+// The stateful mirror infers State from the element:
+const compBuiltPath = comp3.checkPath(['app', 'offline']);
+const compBuiltValue: boolean = svc.get(compBuiltPath);
+// Runtime string segments under an index signature still work in the builder:
+svc.checkPath(['dictionary', dynKey]);
+// @ts-expect-error — typo'd segment after a selector ('authr' is not on Book)
+svc.checkPath(['books', { array: 'data', get: 0 }, 'authr']);
+// @ts-expect-error — typo'd root key
+svc.checkPath(['boks', 'data']);
+// @ts-expect-error — typo'd segment (stateful mirror)
+comp3.checkPath(['app', 'offlin']);
+// @ts-expect-error — predicate annotated with the WRONG element type for this position
+svc.checkPath(['form', { array: 'fields', get: (f: Book) => true }]);
 // Explicit target without an entry path (backward-compat escape hatch):
 svc.set<Book>({ title: 'x' });
 comp3.setState<Book>({ title: 'x' });
@@ -198,6 +212,15 @@ svc.set({ app: { offline: true } });
 svc.set({ garbage: 1 });
 // @ts-expect-error — unknown root key (stateful mirror)
 comp3.setState({ garbage: 1 });
+
+// ── SetStateOptions is non-generic and has NO entryPath ──────────────────
+// entryPath lives only on the set()/setState() overloads; a pre-built options
+// object carrying one must be typed per call site (or left untyped).
+import { SetStateOptions } from '../dist/index';
+const plainOpts: SetStateOptions = { cacheHandlerName: 'localstorage' };
+svc.set({ app: { offline: true } }, plainOpts);
+// @ts-expect-error — entryPath is not part of SetStateOptions anymore
+const optsWithPath: SetStateOptions = { entryPath: ['app', 'offline'] };
 
 // ── negative cases (each MUST error) ─────────────────────────────────────
 

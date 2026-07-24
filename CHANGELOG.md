@@ -174,3 +174,10 @@ Needs to be reverted to that:
 
 ## [6.0.2]
 - fix(types): better tyes for set() 
+
+## [7.0.0]
+- feat(types): `StatePath` is now the fully typed path type (formerly `StatePathConstraint`) — dynamic path variables get per-segment validation, IDE suggestions and predicate auto-typing, other refactors
+
+- **BREAKING (types only)**:: consumers must be on TypeScript >= 6.0 (`NoInfer_` polyfill removed)
+- **BREAKING (types only)**:: `SetStateOptions` is no longer generic and no longer contains `entryPath`, `entryPath` now lives on the `set()` / `setState()` overloads themselves.
+- **BREAKING**:: `getUntyped()` removed
