@@ -109,6 +109,13 @@ export type StateChange<State> =
  *  LitElementStateSubscription.path and SetStateOptions.entryPath. */
 export type StatePath<State> = readonly (string | ArrayElementSelector<string, any>)[];
 
+/** Equivalent of the TS 5.4 `NoInfer` intrinsic, compatible with the TS >= 5.0
+ *  consumer floor: keeps a type parameter out of inference, so it resolves to
+ *  its declared default unless given explicitly. Used on the target-typed
+ *  set()/setState() overloads — without it, the target would be inferred FROM
+ *  statePartial and the check would vacuously pass for any argument. */
+export type NoInfer_<T> = [T][T extends any ? 0 : never];
+
 /** True only for `any`. */
 type IsAny<T> = 0 extends (1 & T) ? true : false;
 

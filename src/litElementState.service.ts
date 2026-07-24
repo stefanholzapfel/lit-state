@@ -1,6 +1,6 @@
 import {DeepPartial} from 'ts-essentials';
 import {
-    CacheHandler, CheckedStatePath, GetStateOptions, SetStateOptions,
+    CacheHandler, CheckedStatePath, GetStateOptions, NoInfer_, SetStateOptions,
     StateChange,
     StateConfig, StatePath, StatePathConstraint, StatePathValue,
     StateSubscriptionFunction,
@@ -131,21 +131,47 @@ export class LitElementStateService<State> {
 
     // Overload: with a typed entry path — the path is validated/suggested like
     // subscription paths and statePartial is checked against the value at the
-    // path's end (plain value or a StateChange of it).
+    // path's end (plain value or a StateChange of it). The loose entryPath of
+    // SetStateOptions is Omitted from the intersection: its shape lacks the
+    // `| Function` selector alternative ([4] in index.ts), so it would reject
+    // dynamic paths typed with StatePathConstraint<State>.
     set<const P extends StatePathConstraint<State>>(
         statePartial: StatePathValue<State, P> | StateChange<StatePathValue<State, P>>,
-        options: SetStateOptions<State> & { entryPath: CheckedStatePath<State, P> }
+        options: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath: CheckedStatePath<State, P> }
+    ): void;
+    // Overload: EXPLICIT target type + entry path — for dynamic (non-literal)
+    // paths, whose end value is unknowable to the type system: the caller
+    // asserts it, e.g. set<SubState>(partial, { entryPath: dynamicPath }).
+    // Target defaults to never and is NoInfer_'d, so this overload only
+    // participates when the type argument is given explicitly — otherwise it
+    // would catch calls with invalid literal paths that fall through the
+    // overload above (Target inferred from statePartial checks nothing). The
+    // path is only shape-checked here, not position-exact; the loose
+    // StatePath alternative admits legacy StatePath<...>-typed variables.
+    set<Target = never>(
+        statePartial: StateChange<NoInfer_<Target>>,
+        options: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath: StatePathConstraint<State> | StatePath<State> }
     ): void;
     // Overload: whole-state change. `Omit` makes literals with an entryPath fail
-    // this overload (excess property), so they are typed by the overload above;
+    // this overload (excess property), so they are typed by the overloads above;
     // pre-built option objects (non-fresh) still match for backward compatibility.
+    // TargetedState is NoInfer_'d: unannotated calls are checked against the
+    // full State; an explicit type argument still targets a sub-state.
+    //
+    // Note on the implementation signature below (not visible in the published
+    // types): entryPath is widened to `any` so the checked overload stays
+    // assignable — for an uninferred P, CheckedStatePath<State, P> is an
+    // unresolved conditional that TS cannot relate to StatePath<State>. The
+    // plain SetStateOptions<State> must not appear as an intersection
+    // constituent there for the same reason. (This comment sits on the erased
+    // overload, not the implementation, to keep the JS emit unchanged.)
     set<TargetedState = State>(
-        statePartial: StateChange<TargetedState>,
+        statePartial: StateChange<NoInfer_<TargetedState>>,
         options?: Omit<SetStateOptions<State>, 'entryPath'>
     ): void;
     set(
         statePartial: any,
-        options?: SetStateOptions<State>
+        options?: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath?: any }
     ) {
         let stateChange = statePartial as StateChange<State>;
         if (options?.entryPath) {

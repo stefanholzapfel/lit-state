@@ -3,7 +3,7 @@ import {
     StateSubscriptionFunction,
     StateChange,
     SubscribeStateFromElementOptions,
-    CheckedStatePath, StatePathConstraint, StatePathValue,
+    CheckedStatePath, NoInfer_, StatePath, StatePathConstraint, StatePathValue,
     SetStateOptions
 } from './index.js';
 import {LitElementStateService} from './litElementState.service.js';
@@ -82,18 +82,28 @@ export class LitElementStateful<State> extends LitElement {
     // Overload: with a typed entry path (see LitElementStateService.set).
     setState<const P extends StatePathConstraint<State>>(
         statePartial: StatePathValue<State, P> | StateChange<StatePathValue<State, P>>,
-        options: SetStateOptions<State> & { entryPath: CheckedStatePath<State, P> }
+        options: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath: CheckedStatePath<State, P> }
+    ): void;
+    // Overload: explicit target type + entry path for dynamic paths (see
+    // LitElementStateService.set).
+    setState<Target = never>(
+        statePartial: StateChange<NoInfer_<Target>>,
+        options: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath: StatePathConstraint<State> | StatePath<State> }
     ): void;
     // Overload: whole-state change. `Omit` makes literals with an entryPath fail
-    // this overload (excess property), so they are typed by the overload above;
+    // this overload (excess property), so they are typed by the overloads above;
     // pre-built option objects (non-fresh) still match for backward compatibility.
-    setState(
-        statePartial: StateChange<State>,
+    //
+    // The implementation signature below widens entryPath to `any`, see
+    // LitElementStateService.set. (This comment sits on the erased overload,
+    // not the implementation, to keep the JS emit unchanged.)
+    setState<TargetedState = State>(
+        statePartial: StateChange<NoInfer_<TargetedState>>,
         options?: Omit<SetStateOptions<State>, 'entryPath'>
     ): void;
     setState(
         statePartial: any,
-        options?: SetStateOptions<State>) {
+        options?: Omit<SetStateOptions<State>, 'entryPath'> & { entryPath?: any }) {
         this.stateService.set(statePartial, options);
     }
 

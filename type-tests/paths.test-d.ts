@@ -149,6 +149,56 @@ svc.set({ title: 'x' }, { entryPath: ['books', 'data', 'title'] });
 // @ts-expect-error — typo in entry path (stateful mirror)
 comp3.setState(true, { entryPath: ['app', 'offlin'] });
 
+// ── dynamic (non-literal) paths ──────────────────────────────────────────
+// A path variable typed with the exported constraint is accepted by ALL path
+// methods — including set(), whose checked overload must NOT intersect the
+// loose SetStateOptions.entryPath (its StatePath shape rejects the
+// constraint's `| Function` selector alternative, see [4] in index.ts).
+import { StatePathConstraint, StateChange } from '../dist/index';
+declare const dynKey: string;
+const dynPath: StatePathConstraint<State> = ['dictionary', dynKey];
+svc.get(dynPath);
+svc.subscribe(dynPath, v => {});
+svc.set({ title: 'x' }, { entryPath: dynPath });
+comp3.setState({ title: 'x' }, { entryPath: dynPath });
+// statePartial is `any` for dynamic paths — opt into checking via `satisfies`:
+svc.set({ title: 'x' } satisfies StateChange<Book>, { entryPath: dynPath });
+// A runtime string segment kept in a TUPLE stays a checked literal path — the
+// index-signature node accepts it and the value type stays exact:
+svc.set({ title: 'x' }, { entryPath: ['dictionary', dynKey] });
+// @ts-expect-error — value type does not match the end of the tuple path
+svc.set({ title: 0 }, { entryPath: ['dictionary', dynKey] });
+
+// ── explicit-target set()/setState(): the generic types statePartial ─────
+// Dynamic path + explicit target: the partial is checked against the target.
+svc.set<Book>({ title: 'x' }, { entryPath: dynPath });
+comp3.setState<Book>({ title: 'x' }, { entryPath: dynPath });
+// @ts-expect-error — partial does not match the explicit target type
+svc.set<Book>({ nope: 1 }, { entryPath: dynPath });
+// @ts-expect-error — partial does not match the explicit target (stateful mirror)
+comp3.setState<Book>({ nope: 1 }, { entryPath: dynPath });
+// Explicit target also admits legacy loose-typed path variables (the
+// StatePath type parameter is unused — only the shape counts). NOTE: without
+// the explicit target such a path may or may not pass the checked overload —
+// its ArrayElementSelector<string, any> members satisfy the constraint only
+// when State contains a plain-string pattern-key array (like arrayDictionary
+// here), and then statePartial degrades to `any`. The explicit target makes
+// the partial checked either way:
+import { StatePath } from '../dist/index';
+declare const legacyPath: StatePath<Book>;
+svc.set<Book>({ title: 'x' }, { entryPath: legacyPath });
+comp3.setState<Book>({ title: 'x' }, { entryPath: legacyPath });
+// Explicit target without an entry path (backward-compat escape hatch):
+svc.set<Book>({ title: 'x' });
+comp3.setState<Book>({ title: 'x' });
+// Without a generic and without an entry path, the partial is checked against
+// the FULL state (TargetedState defaults to State and is NOT inferred):
+svc.set({ app: { offline: true } });
+// @ts-expect-error — unknown root key is no longer silently accepted via inference
+svc.set({ garbage: 1 });
+// @ts-expect-error — unknown root key (stateful mirror)
+comp3.setState({ garbage: 1 });
+
 // ── negative cases (each MUST error) ─────────────────────────────────────
 
 // @ts-expect-error — typo'd key

@@ -171,3 +171,6 @@ Needs to be reverted to that:
 
 ## [6.0.1]
 - chore: export helpers
+
+## [6.0.2]
+- fix(types): better tyes for set() 

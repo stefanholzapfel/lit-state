@@ -262,6 +262,15 @@ It's a matter of taste if / when to use this array notation for navigating to th
 The `entryPath` is fully typed: every segment is validated against your state (with IDE suggestions), and the state
 partial you pass is checked against the value at the path's end.
 
+Without an `entryPath` the partial is checked against the full state. If you build entry paths **dynamically** (a
+variable instead of a literal), type the variable as `StatePathConstraint<State>` — the value at the path's end is then
+unknowable to the compiler, so the partial is unchecked. To get checking back, pass the target type explicitly:
+
+```
+const dynamicPath: StatePathConstraint<AppState> = ['caches', cacheKey];
+stateService.set<CacheEntry>({ ... }, { entryPath: dynamicPath })
+```
+
 **Hint**: You can use a PredicateFunction or a numeric index for array navigation in your entry path (see section "**Array operations**")
 
 
