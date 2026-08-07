@@ -368,7 +368,7 @@ Optionally you can also provide a name to enable the cache handler to use differ
 
 Example:
 ```
-new LitElementStateService<State>(
+const stateService = new LitElementStateService<State>(
     {
         exampleState: {
             offline: false,
@@ -385,6 +385,10 @@ new LitElementStateService<State>(
         }
     }
 ));
+
+// Populate the cache via the cache handlers
+await stateService.load()
+
 ```
 
 The LocalStorageCacheHandler is provided with this package via a dedicated subpath:
@@ -414,8 +418,7 @@ this.setState(
 
 The handler name is the ```name``` property of the cache handler. 
 
-The cache handler has to be provided when instantiating the service,
-otherwise you will get an error.
+The cache handler has to be provided when instantiating the service, otherwise you will get an error.
 
 <h2>Exceptions from caching</h2>
 The ```StateConfig.cache.exceptions``` property allows you to define an array of exceptions for the cache handler.

@@ -37,16 +37,16 @@ export class LitElementStateService<State> {
             ...config!.cache && {cache: config!.cache}
         }
 
-        this.config?.cache?.handlers.forEach(cacheHandler => {
-            this.cacheHandlers.set(cacheHandler.name, cacheHandler);
-            initialState = this.deepReduce(initialState!, cacheHandler.load(this));
-        })
-
         if (this.config.global) {
             LitElementStateService._globalInstance = this;
         }
 
         this._state = initialState!;
+
+        if (this.config?.cache?.handlers && Array.isArray(this.config.cache.handlers))
+            for (const cacheHandler of this.config.cache.handlers) {
+                this.cacheHandlers.set(cacheHandler.name, cacheHandler)
+            }
     }
 
     private _state: State;
@@ -54,6 +54,13 @@ export class LitElementStateService<State> {
     get state(): State {
         return this._state;
     };
+
+    async load() {
+        if (this.config?.cache?.handlers && Array.isArray(this.config.cache.handlers))
+            for (const cacheHandler of this.config.cache.handlers) {
+                this._state = this.deepReduce(this._state!, await cacheHandler.load(this))
+            }
+    }
 
     static getGlobalInstance<State>(): LitElementStateService<State> {
         return LitElementStateService._globalInstance;

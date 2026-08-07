@@ -184,5 +184,8 @@ Needs to be reverted to that:
 
 ## [8.0.0]
 - chore(types): make the CacheHandler's set and load async so handlers that won't work sync can be implemented
-- 
+
 - **BREAKING**:: CachHandler load & set are now async
+
+## [8.0.1]
+- chore(feat): move initial state loading into separate async load method 
