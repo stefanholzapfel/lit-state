@@ -181,3 +181,8 @@ Needs to be reverted to that:
 - **BREAKING (types only)**:: consumers must be on TypeScript >= 6.0 (`NoInfer_` polyfill removed)
 - **BREAKING (types only)**:: `SetStateOptions` is no longer generic and no longer contains `entryPath`, `entryPath` now lives on the `set()` / `setState()` overloads themselves.
 - **BREAKING**:: `getUntyped()` removed
+
+## [8.0.0]
+- chore(types): make the CacheHandler's set and load async so handlers that won't work sync can be implemented
+- 
+- **BREAKING**:: CachHandler load & set are now async

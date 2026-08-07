@@ -8,7 +8,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
     name = 'localstorage';
     private localStorageKeys = new Set<string>();
 
-    load(stateServiceInstance: LitElementStateService<State>): StateChange<State> {
+    async load(stateServiceInstance: LitElementStateService<State>): Promise<StateChange<State>> {
         const res = {} as DeepPartial<State>;
         const fullPrefix = this.getFullPrefix(stateServiceInstance);
         for (const key in localStorage) {
@@ -47,7 +47,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
         });
     };
 
-    set(change: StateChange<State>, stateServiceInstance: LitElementStateService<State>) {
+    async set(change: StateChange<State>, stateServiceInstance: LitElementStateService<State>) {
         let prependedCount = 1;
         const path = [ LOCALSTORAGE_PREFIX ];
         if (!!stateServiceInstance?.config?.cache?.name) {

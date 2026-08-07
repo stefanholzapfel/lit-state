@@ -12,8 +12,8 @@ export interface StateConfig<State> {
 
 export interface CacheHandler<State> {
     name: string;
-    set(change: StateChange<State>, stateServiceInstance: LitElementStateService<State>): void;
-    load(stateServiceInstance: LitElementStateService<State>): StateChange<State>;
+    set(change: StateChange<State>, stateServiceInstance: LitElementStateService<State>): Promise<void>;
+    load(stateServiceInstance: LitElementStateService<State>): Promise<StateChange<State>>;
 }
 
 export type StateSubscriptionFunction<StatePart> = (
