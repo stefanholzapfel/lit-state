@@ -195,3 +195,6 @@ Needs to be reverted to that:
 
 ## [8.0.3]
 - fix(state.service): further improve array deepReducing by leveraging recursion in more cases
+
+## [8.0.4]
+- chore: Forgot to build the new versions 8.0.2 & 8.0.3 - done now
