@@ -188,4 +188,7 @@ Needs to be reverted to that:
 - **BREAKING**:: CachHandler load & set are now async
 
 ## [8.0.1]
-- chore(feat): move initial state loading into separate async load method 
+- chore(feat): move initial state loading into separate async load method
+
+## [8.0.2]
+- fix(state.service): re-add reducer mode in array changes for correct behavior

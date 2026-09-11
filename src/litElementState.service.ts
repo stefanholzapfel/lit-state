@@ -266,6 +266,7 @@ export class LitElementStateService<State> {
                             this.deepReduce(state[key][arrayOperation.at], val);
                         } else {
                             state[key][arrayOperation.at] = val;
+                            change[key]._reducerMode = reducerMode; // preserve 'replace' for subsequent cache-handlers
                         }
                     } else if (arrayOperation.at instanceof Function) {
                         const indices: number[] = []
@@ -280,6 +281,7 @@ export class LitElementStateService<State> {
                                 this.deepReduce(state[key][index], val);
                             } else {
                                 state[key][index] = val;
+                                change[key]._reducerMode = reducerMode; // preserve 'replace' for the next iterations and subsequent cache-handlers
                             }
                         });
                     }
