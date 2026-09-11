@@ -260,14 +260,7 @@ export class LitElementStateService<State> {
                     const valIsFunction = arrayOperation.val && arrayOperation.val instanceof Function;
                     if (typeof arrayOperation.at === 'number') {
                         const val = valIsFunction ? arrayOperation.val(state[key][arrayOperation.at]) : arrayOperation.val;
-                        const reducerMode = val._reducerMode;
-                        delete val._reducerMode;
-                        if (!reducerMode || reducerMode === 'merge') {
-                            this.deepReduce(state[key][arrayOperation.at], val);
-                        } else {
-                            state[key][arrayOperation.at] = val;
-                            change[key]._reducerMode = reducerMode; // preserve 'replace' for subsequent cache-handlers
-                        }
+                        this.deepReduce(state[key], { [arrayOperation.at]: val });
                     } else if (arrayOperation.at instanceof Function) {
                         const indices: number[] = []
                         state[key].forEach((elem: any, index: number) => {
@@ -275,14 +268,7 @@ export class LitElementStateService<State> {
                         });
                         indices.forEach(index => {
                             const val = valIsFunction ? arrayOperation.val(state[key][index]) : arrayOperation.val;
-                            const reducerMode = val._reducerMode;
-                            delete val._reducerMode;
-                            if (!reducerMode || reducerMode === 'merge') {
-                                this.deepReduce(state[key][index], val);
-                            } else {
-                                state[key][index] = val;
-                                change[key]._reducerMode = reducerMode; // preserve 'replace' for the next iterations and subsequent cache-handlers
-                            }
+                            this.deepReduce(state[key], { [index]: val });
                         });
                     }
                 } else if (arrayOperation.op === 'push') {

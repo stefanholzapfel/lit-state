@@ -178,17 +178,20 @@ Needs to be reverted to that:
 ## [7.0.0]
 - feat(types): `StatePath` is now the fully typed path type (formerly `StatePathConstraint`) — dynamic path variables get per-segment validation, IDE suggestions and predicate auto-typing, other refactors
 
-- **BREAKING (types only)**:: consumers must be on TypeScript >= 6.0 (`NoInfer_` polyfill removed)
-- **BREAKING (types only)**:: `SetStateOptions` is no longer generic and no longer contains `entryPath`, `entryPath` now lives on the `set()` / `setState()` overloads themselves.
-- **BREAKING**:: `getUntyped()` removed
+- **BREAKING (types only)**: consumers must be on TypeScript >= 6.0 (`NoInfer_` polyfill removed)
+- **BREAKING (types only)**: `SetStateOptions` is no longer generic and no longer contains `entryPath`, `entryPath` now lives on the `set()` / `setState()` overloads themselves.
+- **BREAKING**: `getUntyped()` removed
 
 ## [8.0.0]
 - chore(types): make the CacheHandler's set and load async so handlers that won't work sync can be implemented
 
-- **BREAKING**:: CachHandler load & set are now async
+- **BREAKING**: CachHandler load & set are now async
 
 ## [8.0.1]
 - chore(feat): move initial state loading into separate async load method
 
 ## [8.0.2]
 - fix(state.service): re-add reducer mode in array changes for correct behavior
+
+## [8.0.3]
+- fix(state.service): further improve array deepReducing by leveraging recursion in more cases
