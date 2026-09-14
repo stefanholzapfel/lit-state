@@ -198,3 +198,6 @@ Needs to be reverted to that:
 
 ## [8.0.4]
 - chore: Forgot to build the new versions 8.0.2 & 8.0.3 - done now
+
+## [8.1.0]
+- Feat(caching): Allow to store paths as JSON

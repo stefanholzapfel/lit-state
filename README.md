@@ -426,3 +426,21 @@ The ```StateConfig.cache.exceptions``` property allows you to define an array of
 All keys (also nested ones) that match against any of the provided regular expressions will be omitted from caching.
 
 If you write a cache handler, this behavior has to be implemented in the ```set``` method of your cache handler.
+
+<h2>Store paths as JSON documents</h2>
+
+By default the LocalStorageCacheHandler persists state as atomic per-path entries (arrays are the exception: an array is always stored as one serialized entry at the array's path). The ```StateConfig.cache.storePathsAsJson``` property allows you to define entry paths (dot notation, relative to the state root, e.g. ```'app.topicConfig'```) whose subtrees are persisted as ONE serialized JSON document instead.
+
+Whenever a change touches anything within such a tree, the whole tree is re-persisted from the current state.
+
+Values that can't be represented in JSON (functions, Promises, Elements, Blobs, Dates, Maps / Sets, binary data, circular references, ...) are silently omitted. Keys matching the ```StateConfig.cache.exceptions``` regular expressions are omitted as well. Omitted array entries become ```null``` to keep indices stable.
+
+Example:
+```
+cache: {
+    handlers: [ new LocalStorageCacheHandler<State>() ],
+    storePathsAsJson: [ 'app.topicConfig' ]
+}
+```
+
+This can be used to ensure performance when you have objects with thousands of nested objects / values.

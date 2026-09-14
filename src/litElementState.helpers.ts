@@ -113,3 +113,39 @@ export const isExceptionFromDeepReduce: (obj: any) => boolean = (obj) => {
         obj instanceof Date
     );
 }
+
+// Drops functions, symbols, bigints, Maps/Sets, binary data, the isExceptionFromDeepReduce types and circular references
+export const toCacheableJson = (value: any, exceptions?: RegExp[]): any => {
+    const ancestors = new WeakSet();
+    const convert = (val: any): any => {
+        if (val === null) return null;
+        const type = typeof val;
+        if (type === 'function' || type === 'symbol' || type === 'bigint' || type === 'undefined') {
+            return undefined;
+        }
+        if (type !== 'object') return val;
+        if (isExceptionFromDeepReduce(val) ||
+            val instanceof Map ||
+            val instanceof Set ||
+            val instanceof ArrayBuffer ||
+            ArrayBuffer.isView(val) ||
+            ancestors.has(val)) {
+            return undefined;
+        }
+        ancestors.add(val);
+        let converted: any;
+        if (Array.isArray(val)) {
+            converted = val.map(entry => convert(entry) ?? null);
+        } else {
+            converted = {};
+            for (const key in val) {
+                if (exceptions?.some(regEx => regEx.test(key))) continue;
+                const convertedValue = convert(val[key]);
+                if (convertedValue !== undefined) converted[key] = convertedValue;
+            }
+        }
+        ancestors.delete(val);
+        return converted;
+    };
+    return convert(value);
+}

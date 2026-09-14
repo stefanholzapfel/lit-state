@@ -4,6 +4,7 @@ export interface StateConfig<State> {
     cache?: {
         name?: string;
         exceptions?: RegExp[];
+        storePathsAsJson?: string[];
         handlers: CacheHandler<State>[];
     };
     defaultSubscribeOptions?: SubscribeStateFromElementOptions;

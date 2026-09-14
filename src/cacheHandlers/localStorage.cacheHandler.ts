@@ -1,5 +1,5 @@
 import {CacheHandler, LitElementStateService, StateChange} from '../index.js';
-import {isExceptionFromDeepReduce} from '../litElementState.helpers.js';
+import {isExceptionFromDeepReduce, toCacheableJson} from '../litElementState.helpers.js';
 import {DeepPartial} from 'ts-essentials';
 
 const LOCALSTORAGE_PREFIX = 'lit-state';
@@ -26,6 +26,7 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
                     case 'string':
                     case 'object':
                     case 'array':
+                    case 'json':
                         this.setValue(res, path, entry.v);
                         break;
                 }
@@ -65,6 +66,19 @@ class LocalStorageCacheHandler<State> implements CacheHandler<State> {
             for (const regEx of stateServiceInstance.config?.cache?.exceptions || []) {
                 if (regEx.test(key))
                     isCustomException = true;
+            }
+            if (!isCustomException && stateServiceInstance.config?.cache?.storePathsAsJson
+                ?.includes(fullPath.slice(prependedCount).join('.'))) {
+                this.unset(pathString);
+                const json = toCacheableJson(
+                    stateServiceInstance.get(fullPath.slice(prependedCount) as any),
+                    stateServiceInstance.config?.cache?.exceptions
+                );
+                if (json !== undefined) {
+                    localStorage.setItem(pathString, JSON.stringify({ v: json, t: 'json' }));
+                    this.localStorageKeys.add(pathString);
+                }
+                continue;
             }
             if (!isCustomException && !isExceptionFromDeepReduce(change[key])) {
                 if (change[key] && typeof change[key] === 'object') {
